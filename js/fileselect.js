@@ -79,6 +79,7 @@ var handleFiles = function() {
                                          canvasOriginalDiv);
       imageHandlerOriginal.drawImage();
       // Save image in custom Image object
+      console.log("image size: " + img.width + ", " + img.height)
       imagegraph = new Imagegraph(imageHandlerOriginal.image, imageHandlerOriginal.ctx);
       energyPicture = imagegraph.energyPicture();
       var imageHandlerEnergy = new ImageHandler(energyPicture,
