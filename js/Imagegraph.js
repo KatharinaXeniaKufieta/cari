@@ -1,7 +1,6 @@
 /**********************************************
  * Custom Image Class
  *********************************************/
-
 var Imagegraph = function(image, ctx) {
   // ImageData: Reading and writing a data
   // array to manipulate pixel data.
@@ -17,6 +16,13 @@ var Imagegraph = function(image, ctx) {
   this.setPixelArray();
 }
 
+/*
+ * Create pixel object for every pixel in picture, calculate
+ * its energy and save it. All pixels are saved in the array
+ * this.pixels and contains its energy, a pointer to the pixel
+ * above it and the distance so far traveled when searching for
+ * paths.
+ */
 Imagegraph.prototype.setPixelArray = function() {
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
@@ -31,6 +37,9 @@ Imagegraph.prototype.setPixelArray = function() {
   }
 }
 
+/*
+ * Return the pixel at the specified column and row.
+*/
 Imagegraph.prototype.getPixel = function(col, row) {
   var startIndex = row * this.width * 4 + col * 4;
   var red = this.imageData.data[startIndex],
@@ -40,6 +49,12 @@ Imagegraph.prototype.getPixel = function(col, row) {
   return new Pixel(col, row, new Color(red, green, blue, alpha));
 }
 
+/*
+ * Calculate the energy of the pixel at a specified column
+ * and row.
+ * PREREQUISITE: The Pixel array this.pixel has to be correctly
+ * defined before calling this function.
+ */
 Imagegraph.prototype.calculateEnergy = function(col, row) {
   if (col === 0 || row === 0 || col === this.width - 1||
       row === this.height -1) {
@@ -63,14 +78,25 @@ Imagegraph.prototype.calculateEnergy = function(col, row) {
   return energy;
 }
 
+/*
+ * Return the index for the given row and column.
+ */
 Imagegraph.prototype.getIndex = function(col, row) {
   return row * this.width + col;
 }
 
+/*
+ * Return the energy of the pixel at the given row and column.
+ */
 Imagegraph.prototype.getEnergy = function(col, row) {
   return this.pixels[this.getIndex(col, row)].energy;
 }
 
+/*
+ * Create the energy picture by calculating the energy of each
+ * each pixel from the original picture. It skips over the
+ * creation of the pixel array which makes it faster.
+ */
 Imagegraph.prototype.energyPicture = function() {
   var energyPicture = this.ctx.createImageData(this.imageData);
   var data = energyPicture.data;
