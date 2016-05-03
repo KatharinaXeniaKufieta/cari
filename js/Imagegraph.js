@@ -49,6 +49,62 @@ Imagegraph.prototype.getPixel = function(col, row) {
   return new Pixel(col, row, new Color(red, green, blue, alpha));
 }
 
+Imagegraph.prototype.getVerticalMinPath = function() {
+  // queue of pixels that need to be processed to find the
+  // shortest path
+  var queue = new Array(3*this.width);
+  // minimum Distance that will help to find the shortest
+  // path
+  var minDist = Number.POSITIVE_INFINITY;
+  // hold on to the last pixel that belongs to the minimum path
+  var minEndPixel = -1;
+  // Array of indices of the minimum path
+  var minPath = new Array(this.height);
+
+  // Add the top row of pixels to the queue
+  for (var i = 0; i < this.width; i++) {
+    queue.unshift(this.pixels[i]);
+    this.pixels[i].marked = true;
+    this.pixels[i].cost = this.pixels[i].energy;
+  }
+  while (queue[0] != null) {
+    var currentPixel = queue.pop();
+    if (currentPixel.row < this.height - 1) {
+      var row = currentPixel.row + 1;
+      for (var col = currentPixel.col - 1; col <= currentPixel.col + 1; col++) {
+        if (col >= 0 && col < this.width) {
+          var newPixel = this.pixels[getIndex(col, row)];
+          if (!newPixel.marked) {
+            newPixel.cost = currentPixel.cost + newPixel.energy;
+            newPixel.prior = currentPixel;
+            newPixel.marked = true;
+            queue.unshift(newPixel);
+          } else if (newPixel.cost > currentPixel.cost + newPixel.energy) {
+            var index = queue.indexOf(newPixel);
+            newPixel.cost = currentPixel.cost + newPixel.energy;
+            newPixel.prior = currentPixel;
+            queue[index] = newPixel;
+          } else {
+            console.log("For debugging purposes: This case should never happen");
+          }
+        }
+      }
+    } else {
+      if (currentPixel.cost < minDist) {
+        minDist = currentPixel.cost;
+        minEndPixel = currentPixel;
+      }
+    }
+  }
+  console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
+  while (minEndPixel.prior != null) {
+    minPath.push(minEndPixel.col);
+    minEndPixel = minEndPixel.prior;
+  }
+  return minPath;
+}
+
+
 /*
  * Calculate the energy of the pixel at a specified column
  * and row.
@@ -76,6 +132,26 @@ Imagegraph.prototype.calculateEnergy = function(col, row) {
   var energy = Math.sqrt(xGradientSquared + yGradientSquared);
 
   return energy;
+}
+
+
+Imagegraph.prototype.pathPicture = function(paths) {
+  var pathPicture = this.ctx.createImageData(this.imageData);
+  var data = pathPicture.data;
+
+
+  for (var col = 0; col < this.width; col++){
+    for (var row = 0; row < this.height; row++) {
+      var path = this.getEnergy(col, row);
+      energy = Math.floor(energy / 1000 * 255);
+      var startIndex = row * this.width * 4 + col * 4;
+      data[startIndex] = energy;
+      data[startIndex + 1] = energy;
+      data[startIndex + 2] = energy;
+      data[startIndex + 3] = 255; // alpha
+    }
+  }
+  return energyPicture;
 }
 
 /*

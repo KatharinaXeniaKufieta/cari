@@ -10,11 +10,17 @@ var MAX_CANVAS_SIZE = 700,
 var canvasOriginal = doc.createElement('canvas'),
     canvasResized = doc.createElement('canvas'),
     canvasEnergy = doc.createElement('canvas'),
-    canvasPaths = doc.createElement('canvas'),
-    canvasOriginalDiv = doc.getElementById('canvas-original'),
+    canvasPaths = doc.createElement('canvas');
+var canvasOriginalDiv = doc.getElementById('canvas-original'),
     canvasResizedDiv = doc.getElementById('canvas-resized'),
     canvasEnergyDiv = doc.getElementById('canvas-energy'),
     canvasPathsDiv = doc.getElementById('canvas-paths');
+var imageHandlerOriginal = {},
+    imageHandlerResized = {},
+    imageHandlerEnergy = {},
+    imageHandlerPaths = {};
+var verticalNumber = 0,
+    horizontalNumber = 0;
 
 var ImageHandler = function(img, canvas, canvasDiv) {
   // this.canvas = doc.createElement('canvas');
@@ -75,22 +81,38 @@ var handleFiles = function() {
   reader.onload = (function(img) {
     return function(e) {
       img.src = e.target.result;
-      var imageHandlerOriginal = new ImageHandler(img, canvasOriginal,
-                                         canvasOriginalDiv);
+      imageHandlerOriginal = new ImageHandler(img, canvasOriginal,
+                                              canvasOriginalDiv);
       imageHandlerOriginal.drawImage();
       // Save image in custom Image object
       console.log("image size: " + img.width + ", " + img.height)
       imagegraph = new Imagegraph(imageHandlerOriginal.image, imageHandlerOriginal.ctx);
       energyPicture = imagegraph.energyPicture();
-      var imageHandlerEnergy = new ImageHandler(energyPicture,
-                                                canvasEnergy,
-                                                canvasEnergyDiv);
+      imageHandlerEnergy = new ImageHandler(energyPicture,
+                                            canvasEnergy,
+                                            canvasEnergyDiv);
       imageHandlerEnergy.drawImage();
     };
   })(image);
   reader.readAsDataURL(file);
 };
 
+var setNumberVerticalSeams = function() {
+  verticalNumber = this.value;
+  console.log("number entered: " + verticalNumber);
+}
+
+var startResizing = function(e) {
+  console.log("I am in startResizing");
+  console.log(e);
+}
+
+
 var inputElement = document.getElementById('input');
 inputElement.addEventListener("change", handleFiles, false);
 
+var numVertSeamsElement = document.getElementById('numberVerticalSeams');
+numVertSeamsElement.addEventListener("change", setNumberVerticalSeams, false);
+
+var startElement = document.getElementById('start-resizing');
+startElement.addEventListener("click", startResizing.bind(this), false);
