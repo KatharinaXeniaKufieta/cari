@@ -49,17 +49,22 @@ Imagegraph.prototype.getPixel = function(col, row) {
   return new Pixel(col, row, new Color(red, green, blue, alpha));
 }
 
+var newPixel = {};
+var queue = new Array();
+var currentPixel = {};
+var minPath = [];
+
 Imagegraph.prototype.getVerticalMinPath = function() {
   // queue of pixels that need to be processed to find the
   // shortest path
-  var queue = new Array(3*this.width);
+  // var queue = new Array();
   // minimum Distance that will help to find the shortest
   // path
   var minDist = Number.POSITIVE_INFINITY;
   // hold on to the last pixel that belongs to the minimum path
   var minEndPixel = -1;
   // Array of indices of the minimum path
-  var minPath = new Array(this.height);
+  minPath = new Array();
 
   // Add the top row of pixels to the queue
   for (var i = 0; i < this.width; i++) {
@@ -67,13 +72,15 @@ Imagegraph.prototype.getVerticalMinPath = function() {
     this.pixels[i].marked = true;
     this.pixels[i].cost = this.pixels[i].energy;
   }
-  while (queue[0] != null) {
-    var currentPixel = queue.pop();
+  var i = 0;
+  while (queue[0] != null && i < 10) {
+    // i++;
+    currentPixel = queue.pop();
     if (currentPixel.row < this.height - 1) {
       var row = currentPixel.row + 1;
       for (var col = currentPixel.col - 1; col <= currentPixel.col + 1; col++) {
         if (col >= 0 && col < this.width) {
-          var newPixel = this.pixels[getIndex(col, row)];
+          newPixel = this.pixels[this.getIndex(col, row)];
           if (!newPixel.marked) {
             newPixel.cost = currentPixel.cost + newPixel.energy;
             newPixel.prior = currentPixel;
@@ -85,7 +92,7 @@ Imagegraph.prototype.getVerticalMinPath = function() {
             newPixel.prior = currentPixel;
             queue[index] = newPixel;
           } else {
-            console.log("For debugging purposes: This case should never happen");
+            // "Pixel is already in queue and the new cost is not lower");
           }
         }
       }
@@ -97,7 +104,9 @@ Imagegraph.prototype.getVerticalMinPath = function() {
     }
   }
   console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
+  var counter = 0;
   while (minEndPixel.prior != null) {
+    counter++;
     minPath.push(minEndPixel.col);
     minEndPixel = minEndPixel.prior;
   }
@@ -135,23 +144,42 @@ Imagegraph.prototype.calculateEnergy = function(col, row) {
 }
 
 
-Imagegraph.prototype.pathPicture = function(paths) {
+Imagegraph.prototype.pathPicture = function() {
   var pathPicture = this.ctx.createImageData(this.imageData);
   var data = pathPicture.data;
-
-
   for (var col = 0; col < this.width; col++){
     for (var row = 0; row < this.height; row++) {
-      var path = this.getEnergy(col, row);
+      var energy = this.getEnergy(col, row);
       energy = Math.floor(energy / 1000 * 255);
       var startIndex = row * this.width * 4 + col * 4;
-      data[startIndex] = energy;
-      data[startIndex + 1] = energy;
-      data[startIndex + 2] = energy;
-      data[startIndex + 3] = 255; // alpha
+      data[startIndex] = this.imageData.data[startIndex];
+      data[startIndex + 1] = this.imageData.data[startIndex + 1];
+      data[startIndex + 2] = this.imageData.data[startIndex + 2];
+      data[startIndex + 3] = this.imageData.data[startIndex + 3]; // alpha
     }
   }
-  return energyPicture;
+  return pathPicture;
+}
+
+Imagegraph.prototype.addPaths = function(pathPicture, path) {
+  console.log("path: " + path);
+  var data = pathPicture.data;
+  // add path to picture
+  for (var row = 0; row < this.height; row++) {
+    var col = path[row];
+    var startIndex = row * this.width * 4 + col * 4;
+    console.log('data: ' + data[startIndex])
+    data[startIndex] = 255;
+    data[startIndex + 1] = 0;
+    data[startIndex + 2] = 0;
+    data[startIndex + 3] = 255; // alpha
+  }
+  // add path to data, make it red and return picture
+  return pathPicture;
+}
+
+Imagegraph.prototype.removePath = function(path) {
+  // just remove it.
 }
 
 /*

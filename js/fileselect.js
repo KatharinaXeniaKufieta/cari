@@ -6,7 +6,9 @@ var MAX_CANVAS_SIZE = 700,
     win = window,
     image = new Image(),
     file = {},
-    energyPicture = {};
+    imagegraph = {},
+    energyPicture = {},
+    pathPicture = {};
 var canvasOriginal = doc.createElement('canvas'),
     canvasResized = doc.createElement('canvas'),
     canvasEnergy = doc.createElement('canvas'),
@@ -103,8 +105,18 @@ var setNumberVerticalSeams = function() {
 }
 
 var startResizing = function(e) {
-  console.log("I am in startResizing");
-  console.log(e);
+  console.log("I am in startResizing and I will delete " + verticalNumber + " columns of pixels");
+  pathPicture = imagegraph.pathPicture();
+  for (var remove = 0; remove < verticalNumber; remove++) {
+    var verticalMinPath = imagegraph.getVerticalMinPath();
+    console.log("verticalMinPath: " + verticalMinPath);
+    imagegraph.addPaths(pathPicture, verticalMinPath);
+    imagegraph.removePath(verticalMinPath);
+  }
+  imageHandlerPaths = new ImageHandler(pathPicture,
+                                       canvasPaths,
+                                       canvasPathsDiv);
+  imageHandlerPaths.drawImage();
 }
 
 
