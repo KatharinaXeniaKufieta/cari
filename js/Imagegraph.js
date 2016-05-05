@@ -168,7 +168,7 @@ Imagegraph.prototype.addPaths = function(pathPicture, path) {
   for (var row = 0; row < this.height; row++) {
     var col = path[row];
     var startIndex = row * this.width * 4 + col * 4;
-    console.log('data: ' + data[startIndex])
+    console.log('data: ' + data[startIndex]);
     data[startIndex] = 255;
     data[startIndex + 1] = 0;
     data[startIndex + 2] = 0;
@@ -204,9 +204,16 @@ Imagegraph.prototype.getEnergy = function(col, row) {
 Imagegraph.prototype.energyPicture = function() {
   var energyPicture = this.ctx.createImageData(this.imageData);
   var data = energyPicture.data;
+  var stringEnergy = "";
+  console.log("-------------------- Energy of the picture : --------------------");
   for (var col = 0; col < this.width; col++){
     for (var row = 0; row < this.height; row++) {
       var energy = this.getEnergy(col, row);
+      if (row == this.height - 1) {
+        stringEnergy += energy.toFixed(2);
+      } else {
+        stringEnergy += energy.toFixed(2) + ", ";
+      }
       energy = Math.floor(energy / 1000 * 255);
       var startIndex = row * this.width * 4 + col * 4;
       data[startIndex] = energy;
@@ -214,6 +221,9 @@ Imagegraph.prototype.energyPicture = function() {
       data[startIndex + 2] = energy;
       data[startIndex + 3] = 255; // alpha
     }
+    console.log(stringEnergy);
+    stringEnergy = "";
   }
+  console.log("-----------------------------------------------------------------");
   return energyPicture;
 }
