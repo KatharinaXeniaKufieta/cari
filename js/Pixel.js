@@ -5,6 +5,12 @@ var Color = function(r, g, b, a) {
   this.alpha = a;
 }
 
+Color.prototype.toString = function() {
+  var stringColor = "rgba = (" + this.red + ", " + this.green + ", " +
+      this.blue + ", " + this.alpha + ")";
+  return stringColor;
+}
+
 /**********************************************
 * Custom Pixel Class
 *********************************************/
@@ -32,4 +38,11 @@ Pixel.prototype.setCost = function(dist) {
 // Set Edge to Pixel pixel (for backtracing a path)
 Pixel.prototype.setEdgeTo = function(pixel) {
   this.prior = pixel;
+}
+
+// Describe pixel in a string
+Pixel.prototype.toString = function() {
+  var stringPixel = "(col, row) = (" + this.col + ", " + this.row +
+      "), " + this.color.toString();
+  return stringPixel;
 }

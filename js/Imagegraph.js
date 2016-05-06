@@ -24,10 +24,19 @@ var Imagegraph = function(image, ctx) {
  * paths.
  */
 Imagegraph.prototype.setPixelArray = function() {
+  var stringPixels = "";
+  console.log("-------------------- Energy of the picture : --------------------");
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
       this.pixels.push(this.getPixel(col, row));
+      if (col == this.width - 1) {
+        stringPixels += this.getPixel(col, row).toString();
+      } else {
+        stringPixels += this.getPixel(col, row).toString() + ", ";
+      }
     }
+    console.log(stringPixels);
+    stringPixels = "";
   }
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
@@ -35,6 +44,7 @@ Imagegraph.prototype.setPixelArray = function() {
       this.pixels[this.getIndex(col, row)].setEnergy(energy);
     }
   }
+  console.log("-----------------------------------------------------------------");
 }
 
 /*
@@ -121,8 +131,8 @@ Imagegraph.prototype.getVerticalMinPath = function() {
  * defined before calling this function.
  */
 Imagegraph.prototype.calculateEnergy = function(col, row) {
-  if (col === 0 || row === 0 || col === this.width - 1||
-      row === this.height -1) {
+  if (col === 0 || row === 0 || col === this.width - 1 ||
+      row === this.height - 1) {
     return 1000;
   }
   var pixelAbove = this.pixels[this.getIndex(col, row - 1)],
@@ -204,15 +214,24 @@ Imagegraph.prototype.getEnergy = function(col, row) {
 Imagegraph.prototype.energyPicture = function() {
   var energyPicture = this.ctx.createImageData(this.imageData);
   var data = energyPicture.data;
+  var maxVal = 0;
   var stringEnergy = "";
   console.log("-------------------- Energy of the picture : --------------------");
-  for (var col = 0; col < this.width; col++){
-    for (var row = 0; row < this.height; row++) {
+  for (var row = 0; row < this.height; row++) {
+    for (var col = 0; col < this.width; col++){
       var energy = this.getEnergy(col, row);
-      if (row == this.height - 1) {
+      if (col == this.width - 1) {
         stringEnergy += energy.toFixed(2);
       } else {
         stringEnergy += energy.toFixed(2) + ", ";
+      }
+      if (row !== 0 && col !== 0 && row !== this.height - 1 && col !== this.width - 1) {
+        if (energy > maxVal) {
+          maxVal = energy;
+          // console.log(row + ", " + col);
+          // console.log("energy: " + energy);
+          // console.log("maxVal: " + maxVal);
+        }
       }
       energy = Math.floor(energy / 1000 * 255);
       var startIndex = row * this.width * 4 + col * 4;
@@ -225,5 +244,22 @@ Imagegraph.prototype.energyPicture = function() {
     stringEnergy = "";
   }
   console.log("-----------------------------------------------------------------");
+  // if the picture is black, return it
+  if (maxVal === 0) {
+    return energyPicture;
+  }
+  console.log("maxVal: " + maxVal);
+  // normalize picture
+  for (var row = 1; row < this.height - 1; row++) {
+    for (var col = 1; col < this.width - 1; col++){
+      var energy = this.getEnergy(col, row);
+      energy = Math.floor(energy / maxVal * 255);
+      var startIndex = row * this.width * 4 + col * 4;
+      data[startIndex] = energy;
+      data[startIndex + 1] = energy;
+      data[startIndex + 2] = energy;
+      data[startIndex + 3] = 255; // alpha
+    }
+  }
   return energyPicture;
 }
