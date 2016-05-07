@@ -1,3 +1,6 @@
+/**********************************************
+ * Custom Color Class
+ *********************************************/
 var Color = function(r, g, b, a) {
   this.red = r;
   this.green = g;
@@ -5,6 +8,9 @@ var Color = function(r, g, b, a) {
   this.alpha = a;
 }
 
+/*
+ * Write the color to a string
+ */
 Color.prototype.toString = function() {
   var stringColor = "rgba = (" + this.red + ", " + this.green + ", " +
       this.blue + ", " + this.alpha + ")";
@@ -25,22 +31,30 @@ var Pixel = function(col, row, color) {
   this.prior = null; // edge to pixel before this pixel on the search path
 }
 
-// set the energy of the pixel
+/*
+ * Set the energy of the pixel
+ */
 Pixel.prototype.setEnergy = function(energy) {
   this.energy = energy;
 }
 
-// set the cost from starting Pixel
+/*
+ * Set the cost from starting Pixel
+ */
 Pixel.prototype.setCost = function(dist) {
   this.cost = cost;
 }
 
-// Set Edge to Pixel pixel (for backtracing a path)
+/*
+ * Set Edge to Pixel pixel (for backtracing a path)
+ */
 Pixel.prototype.setEdgeTo = function(pixel) {
   this.prior = pixel;
 }
 
-// Describe pixel in a string
+/*
+ * Write the pixel to a string
+ */
 Pixel.prototype.toString = function() {
   var stringPixel = "(col, row) = (" + this.col + ", " + this.row +
       "), " + this.color.toString();

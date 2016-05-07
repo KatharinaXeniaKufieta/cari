@@ -59,15 +59,16 @@ Imagegraph.prototype.getPixel = function(col, row) {
   return new Pixel(col, row, new Color(red, green, blue, alpha));
 }
 
-var newPixel = {};
-var queue = new Array();
-var currentPixel = {};
-var minPath = [];
 
+/*
+ * Find vertical seam
+ */
 Imagegraph.prototype.getVerticalMinPath = function() {
+  var newPixel = {};
   // queue of pixels that need to be processed to find the
   // shortest path
-  // var queue = new Array();
+  var queue = new Array();
+  var currentPixel = {};
   // minimum Distance that will help to find the shortest
   // path
   var minDist = Number.POSITIVE_INFINITY;
@@ -154,6 +155,9 @@ Imagegraph.prototype.calculateEnergy = function(col, row) {
 }
 
 
+/*
+ * Create picture where the seams are highlighted in red
+ */
 Imagegraph.prototype.pathPicture = function() {
   var pathPicture = this.ctx.createImageData(this.imageData);
   var data = pathPicture.data;
@@ -171,6 +175,9 @@ Imagegraph.prototype.pathPicture = function() {
   return pathPicture;
 }
 
+/*
+ * Add paths in red to pathPicture
+ */
 Imagegraph.prototype.addPaths = function(pathPicture, path) {
   console.log("path: " + path);
   var data = pathPicture.data;
@@ -188,6 +195,9 @@ Imagegraph.prototype.addPaths = function(pathPicture, path) {
   return pathPicture;
 }
 
+/*
+ * Remove the path from the minimized picture
+ */
 Imagegraph.prototype.removePath = function(path) {
   // just remove it.
 }
