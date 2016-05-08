@@ -8,19 +8,23 @@ var MAX_CANVAS_SIZE = 700,
     file = {},
     imagegraph = {},
     energyPicture = {},
-    pathPicture = {};
+    pathPicture = {},
+    energyPathPicture = {};
 var canvasOriginal = doc.createElement('canvas'),
     canvasResized = doc.createElement('canvas'),
     canvasEnergy = doc.createElement('canvas'),
-    canvasPaths = doc.createElement('canvas');
+    canvasPaths = doc.createElement('canvas'),
+    canvasEnergyPaths = doc.createElement('canvas');
 var canvasOriginalDiv = doc.getElementById('canvas-original'),
     canvasResizedDiv = doc.getElementById('canvas-resized'),
     canvasEnergyDiv = doc.getElementById('canvas-energy'),
-    canvasPathsDiv = doc.getElementById('canvas-paths');
+    canvasPathsDiv = doc.getElementById('canvas-paths'),
+    canvasEnergyPathsDiv = doc.getElementById('canvas-energy-paths');
 var imageHandlerOriginal = {},
     imageHandlerResized = {},
     imageHandlerEnergy = {},
-    imageHandlerPaths = {};
+    imageHandlerPaths = {},
+    imageHandlerEnergyPaths = {};
 var verticalNumber = 0,
     horizontalNumber = 0;
 
@@ -94,6 +98,10 @@ var handleFiles = function() {
                                             canvasEnergy,
                                             canvasEnergyDiv);
       imageHandlerEnergy.drawImage();
+      imageHandlerEnergy = new ImageHandler(energyPicture,
+                                            canvasEnergy,
+                                            canvasEnergyDiv);
+      imageHandlerEnergy.drawImage();
     };
   })(image);
   reader.readAsDataURL(file);
@@ -107,16 +115,23 @@ var setNumberVerticalSeams = function() {
 var startResizing = function(e) {
   console.log("I am in startResizing and I will delete " + verticalNumber + " columns of pixels");
   pathPicture = imagegraph.pathPicture();
+  energyPathPicture = imagegraph.energyPicture();
   for (var remove = 0; remove < verticalNumber; remove++) {
     var verticalMinPath = imagegraph.getVerticalMinPath();
     console.log("verticalMinPath: " + verticalMinPath);
     imagegraph.addPaths(pathPicture, verticalMinPath);
+    imagegraph.addPaths(energyPathPicture, verticalMinPath);
     imagegraph.removePath(verticalMinPath);
   }
   imageHandlerPaths = new ImageHandler(pathPicture,
                                        canvasPaths,
                                        canvasPathsDiv);
   imageHandlerPaths.drawImage();
+
+  imageHandlerEnergyPaths = new ImageHandler(energyPathPicture,
+                                             canvasEnergyPaths,
+                                             canvasEnergyPathsDiv);
+  imageHandlerEnergyPaths.drawImage();
 }
 
 

@@ -83,9 +83,7 @@ Imagegraph.prototype.getVerticalMinPath = function() {
     this.pixels[i].marked = true;
     this.pixels[i].cost = this.pixels[i].energy;
   }
-  var i = 0;
-  while (queue[0] != null && i < 10) {
-    // i++;
+  while (queue[0] != null) {
     currentPixel = queue.pop();
     if (currentPixel.row < this.height - 1) {
       var row = currentPixel.row + 1;
@@ -116,12 +114,36 @@ Imagegraph.prototype.getVerticalMinPath = function() {
   }
   console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
   var counter = 0;
-  while (minEndPixel.prior != null) {
+  while (minEndPixel != null) {
     counter++;
-    minPath.push(minEndPixel.col);
+    minPath.unshift(minEndPixel.col);
     minEndPixel = minEndPixel.prior;
   }
+  this.printPath(minPath);
   return minPath;
+}
+
+Imagegraph.prototype.printPath = function(minPath) {
+  console.log("-------------------- Vertical seam : --------------------");
+  var stringPath = "Vertical seam : { ";
+  for (var i = 0; i < minPath.length; i++) {
+    stringPath += minPath[i] + " ";
+  }
+  stringPath += "}";
+  console.log(stringPath);
+  stringPath = "";
+  for (var row = 0; row < this.height; row++) {
+    for (var col = 0; col < this.width; col++) {
+      if (col === minPath[row]) {
+        stringPath += this.getEnergy(col, row).toFixed(2) + "* ";
+      } else {
+        stringPath += this.getEnergy(col, row).toFixed(2) + "  ";
+      }
+    }
+    console.log(stringPath);
+    stringPath = "";
+  }
+  console.log("---------------------------------------------------------");
 }
 
 
@@ -185,7 +207,6 @@ Imagegraph.prototype.addPaths = function(pathPicture, path) {
   for (var row = 0; row < this.height; row++) {
     var col = path[row];
     var startIndex = row * this.width * 4 + col * 4;
-    console.log('data: ' + data[startIndex]);
     data[startIndex] = 255;
     data[startIndex + 1] = 0;
     data[startIndex + 2] = 0;
@@ -238,9 +259,6 @@ Imagegraph.prototype.energyPicture = function() {
       if (row !== 0 && col !== 0 && row !== this.height - 1 && col !== this.width - 1) {
         if (energy > maxVal) {
           maxVal = energy;
-          // console.log(row + ", " + col);
-          // console.log("energy: " + energy);
-          // console.log("maxVal: " + maxVal);
         }
       }
       energy = Math.floor(energy / 1000 * 255);
@@ -272,4 +290,24 @@ Imagegraph.prototype.energyPicture = function() {
     }
   }
   return energyPicture;
+}
+
+/*
+ * Create picture where the seams are highlighted in red
+ */
+Imagegraph.prototype.pathEnergyPicture = function() {
+  var pathEnergyPicture = this.energyPicture();
+  var data = pathEnergyPicture.data;
+  for (var col = 0; col < this.width; col++){
+    for (var row = 0; row < this.height; row++) {
+      var energy = this.getEnergy(col, row);
+      energy = Math.floor(energy / 1000 * 255);
+      var startIndex = row * this.width * 4 + col * 4;
+      data[startIndex] = this.imageData.data[startIndex];
+      data[startIndex + 1] = this.imageData.data[startIndex + 1];
+      data[startIndex + 2] = this.imageData.data[startIndex + 2];
+      data[startIndex + 3] = this.imageData.data[startIndex + 3]; // alpha
+    }
+  }
+  return pathEnergyPicture;
 }
