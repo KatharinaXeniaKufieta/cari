@@ -13,6 +13,7 @@ var Imagegraph = function(image, ctx) {
   // containing the data in the RGBA order, with integer values
   // between 0 and 255 (included).
   this.pixels = [];
+  this.removedPixels = [];
   this.setPixelArray();
 }
 
@@ -29,6 +30,7 @@ Imagegraph.prototype.setPixelArray = function() {
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
       this.pixels.push(this.getPixel(col, row));
+      this.removedPixels.push(this.getPixel(col, row));
       if (col == this.width - 1) {
         stringPixels += this.getPixel(col, row).toString();
       } else {
@@ -42,6 +44,7 @@ Imagegraph.prototype.setPixelArray = function() {
     for (var col = 0; col < this.width; col++) {
       var energy = this.calculateEnergy(col, row);
       this.pixels[this.getIndex(col, row)].setEnergy(energy);
+      this.removedPixels[this.getIndex(col, row)].setEnergy(energy);
     }
   }
   console.log("-----------------------------------------------------------------");
@@ -58,7 +61,6 @@ Imagegraph.prototype.getPixel = function(col, row) {
       alpha = this.imageData.data[startIndex + 3];
   return new Pixel(col, row, new Color(red, green, blue, alpha));
 }
-
 
 /*
  * Find vertical seam
@@ -79,17 +81,18 @@ Imagegraph.prototype.getVerticalMinPath = function() {
 
   // Add the top row of pixels to the queue
   for (var i = 0; i < this.width; i++) {
-    queue.unshift(this.pixels[i]);
-    this.pixels[i].marked = true;
-    this.pixels[i].cost = this.pixels[i].energy;
+    queue.unshift(this.removedPixels[i]);
+    this.removedPixels[i].marked = true;
+    this.removedPixels[i].cost = this.removedPixels[i].energy;
   }
   while (queue[0] != null) {
+    console.log("Queue is not empty!");
     currentPixel = queue.pop();
     if (currentPixel.row < this.height - 1) {
       var row = currentPixel.row + 1;
       for (var col = currentPixel.col - 1; col <= currentPixel.col + 1; col++) {
         if (col >= 0 && col < this.width) {
-          newPixel = this.pixels[this.getIndex(col, row)];
+          newPixel = this.removedPixels[this.getIndex(col, row)];
           if (!newPixel.marked) {
             newPixel.cost = currentPixel.cost + newPixel.energy;
             newPixel.prior = currentPixel;
@@ -219,8 +222,37 @@ Imagegraph.prototype.addPaths = function(pathPicture, path) {
 /*
  * Remove the path from the minimized picture
  */
-Imagegraph.prototype.removePath = function(path) {
-  // just remove it.
+Imagegraph.prototype.removeVerticalPath = function(path) {
+  var col = 0;
+  var energy = 0;
+  console.log("-------------------- Remove Vertical Path : --------------------");
+  var stringEnergy = "";
+  this.width--;
+  for (var row = 0; row < this.height; row++) {
+    col = path[row];
+    this.removedPixels.splice(this.getIndex(col, row), 1);
+    for (var cols = 0; cols < this.width; cols++) {
+      var energy = this.removedPixels[this.getIndex(cols, row)].energy;
+      if (cols == this.width - 1) {
+        stringEnergy += energy.toFixed(2);
+      } else {
+        stringEnergy += energy.toFixed(2) + ", ";
+      }
+    }
+    console.log(stringEnergy);
+    stringEnergy = "";
+
+    if (col > 1) {
+      energy = this.calculateEnergy(col - 1, row);
+      this.removedPixels[this.getIndex(col - 1, row)].setEnergy(energy);
+    }
+    energy = this.calculateEnergy(col, row);
+    this.removedPixels[this.getIndex(col, row)].setEnergy(energy);
+    for (var cols = 0; cols < this.width; cols++) {
+      this.removedPixels[this.getIndex(cols, row)].marked = false;
+    }
+  }
+  console.log("----------------------------------------------------------------");
 }
 
 /*

@@ -121,7 +121,7 @@ var startResizing = function(e) {
     console.log("verticalMinPath: " + verticalMinPath);
     imagegraph.addPaths(pathPicture, verticalMinPath);
     imagegraph.addPaths(energyPathPicture, verticalMinPath);
-    imagegraph.removePath(verticalMinPath);
+    imagegraph.removeVerticalPath(verticalMinPath);
   }
   imageHandlerPaths = new ImageHandler(pathPicture,
                                        canvasPaths,
