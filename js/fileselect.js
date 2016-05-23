@@ -28,6 +28,9 @@ var imageHandlerOriginal = {},
 var verticalNumber = 0,
     horizontalNumber = 0;
 
+/**********************************************
+ * ImageHandler Class
+ *********************************************/
 var ImageHandler = function(img, canvas, canvasDiv) {
   // this.canvas = doc.createElement('canvas');
   // this.canvasDiv = doc.getElementById('canvas-original');
@@ -45,10 +48,16 @@ var ImageHandler = function(img, canvas, canvasDiv) {
   this.init();
 }
 
+/*
+ * Initialize the image handler.
+ */
 ImageHandler.prototype.init = function() {
   this.scaleImage();
 }
 
+/*
+ * Resize image to canvas size without distorting it.
+ */
 ImageHandler.prototype.scaleImage = function() {
   var ratio = this.height / this.width;
   if (this.height > this.width &&
@@ -65,6 +74,9 @@ ImageHandler.prototype.scaleImage = function() {
   }
 }
 
+/*
+ * Draw the image in the canvas.
+ */
 ImageHandler.prototype.drawImage = function() {
   if (this.image instanceof Image) {
     this.ctx.drawImage(this.image, 0, 0, this.width, this.height,
@@ -107,11 +119,17 @@ var handleFiles = function() {
   reader.readAsDataURL(file);
 };
 
+/*
+ * Set the number of vertical seams that will be deleted.
+ */
 var setNumberVerticalSeams = function() {
   verticalNumber = this.value;
   console.log("number entered: " + verticalNumber);
 }
 
+/*
+ * Start resizing the Picture: Run the seam carver and show the results.
+ */
 var startResizing = function(e) {
   console.log("I am in startResizing and I will delete " + verticalNumber + " columns of pixels");
   pathPicture = imagegraph.pathPicture();
@@ -135,6 +153,10 @@ var startResizing = function(e) {
 }
 
 
+/**********************************************
+ * Add event listeners to image input,
+ * numberVerticalSeams and start button
+ *********************************************/
 var inputElement = document.getElementById('input');
 inputElement.addEventListener("change", handleFiles, false);
 

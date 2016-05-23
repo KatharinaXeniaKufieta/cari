@@ -123,6 +123,7 @@ Imagegraph.prototype.getVerticalMinPath = function() {
   return minPath;
 }
 
+// Print the path in the console
 Imagegraph.prototype.printPath = function(minPath) {
   console.log("-------------------- Vertical seam : --------------------");
   var stringPath = "Vertical seam : { ";
