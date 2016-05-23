@@ -1,5 +1,6 @@
 /**********************************************
- * Custom Image Class
+ * Imagegraph class: Get data from uploaded picture,
+ * create graph, run seamcarver on it
  *********************************************/
 var Imagegraph = function(image, ctx) {
   // ImageData: Reading and writing a data
