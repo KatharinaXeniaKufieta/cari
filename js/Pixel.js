@@ -41,7 +41,7 @@ Pixel.prototype.setEnergy = function(energy) {
 /*
  * Set the cost from starting Pixel
  */
-Pixel.prototype.setCost = function(dist) {
+Pixel.prototype.setCost = function(cost) {
   this.cost = cost;
 }
 
