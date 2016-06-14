@@ -1,10 +1,13 @@
 /**********************************************
  * ImageHandler Class
+ *
+ * Sets the canvas, gets the context.
+ * Resizes the image so it fits the canvas
+ * while maintaining the proportions of the image.
+ * Draws the image to the canvas / context.
+ * Handles both Image and ImageData images.
  *********************************************/
 var ImageHandler = function(img, canvas, canvasDiv) {
-  // this.canvas = doc.createElement('canvas');
-  // this.canvasDiv = doc.getElementById('canvas-original');
-
   this.canvas = canvas;
   this.canvasDiv = canvasDiv;
   this.ctx = this.canvas.getContext('2d');
@@ -46,6 +49,7 @@ ImageHandler.prototype.scaleImage = function() {
 
 /*
  * Draw the image in the canvas.
+ * Handles both Image and ImageData images.
  */
 ImageHandler.prototype.drawImage = function() {
   if (this.image instanceof Image) {
