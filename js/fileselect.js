@@ -31,12 +31,20 @@ var verticalNumber = 0,
 /**********************************************
  * Handle Image upload from user
  *********************************************/
+// handleFiles is called by an even listener when a change in the input
+// field for images is detected. The list of files handed over to this
+// function can then be accessed through this.files, which is a FileList.
 var handleFiles = function() {
   file = this.files[0];
   console.log("file: " + file);
   console.log("this.files: " + this.files);
 
+  // The FileReader object lets web applications asynchronously
+  // read the contents of files (or raw data buffers).
   var reader = new FileReader();
+  // The FileReader.onload function contains an event handler
+  // executed when the load event is fired, which happens when
+  // content read with readAsDataURL is available.
   reader.onload = (function(img) {
     return function(e) {
       img.src = e.target.result;
@@ -58,6 +66,8 @@ var handleFiles = function() {
       imageHandlerEnergy.drawImage();
     };
   })(image);
+  // Start reading the data from file, when ready call the
+  // reader.onload function.
   reader.readAsDataURL(file);
 };
 
@@ -99,6 +109,9 @@ var startResizing = function(e) {
  * Add event listeners to image input,
  * numberVerticalSeams and start button
  *********************************************/
+// When the user uploads a file, that change is detected by this
+// event listener. JavaScript hands over the list of files to the
+// handleFiles function.
 var inputElement = document.getElementById('input');
 inputElement.addEventListener("change", handleFiles, false);
 
