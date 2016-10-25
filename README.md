@@ -20,3 +20,20 @@ Future versions will use [TypeScript](https://www.typescriptlang.org/index.html)
 
 ## Author
 The code is written by [Katharina Kufieta](https://www.linkedin.com/in/katharinakufieta).
+
+## TO DO
+So far, the user does:
+1) Choose and upload a picture
+2) Define how much to reduce the picture in width (only the input of '1' works as of yet, because the energy around the seam is not recalculated and 
+3) Press "Start Resizing"
+
+Given that all inputs were correct, the program then calculates the first seam and displays the energy picture, and pictures with the seam. The resizing does not work yet, because the seam does not get deleted yet, nor is the energy around the seam re-calculated after removing that seam.
+
+The list of To-Dos is as follows:
+1) Re-factor the program into MVVM using Knockout.js before adding features.
+2) Add feature: Picture is automatically compressed by program prior to seam calculation (might be necessary in order to get feasible waiting times).
+3) Add feature: Width and height reduction possible (so far only width reduction is implemented)
+4) Add dragging as a way to resize picture (not only adding number of pixels you want to resize it).
+5) Precalculate 3 versions on how to resize picture: Width, height and diagonally (which could be width & height alternating). Allow the user to decide the direction by dragging the original picture.
+6) Add a % bar to show progress of (pre-) calculations, calculate estimated time until finished and show to the user.
+7) Give option to download resized picture, or even download all pictures (e.g. including seams and energy picture) in a zip file.
