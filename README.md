@@ -21,6 +21,9 @@ Future versions will use [TypeScript](https://www.typescriptlang.org/index.html)
 ## Author
 The code is written by [Katharina Kufieta](https://www.linkedin.com/in/katharinakufieta).
 
+## In-between steps during the development
+I started developing this program before I knew how to use design patterns, what MVVM is and how to use Knockout.js. Once I learned all that, I needed to refactor the code and incorporate Knockout.js, before I continued adding more features. In order to understand how to use Knockout and the HTML5 Canvas, I developed this small example on JSFiddle: https://jsfiddle.net/katharinaxeniakufieta/ateos0x2/
+
 ## TO DO
 So far, the user does:
 1) Choose and upload a picture
