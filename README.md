@@ -10,33 +10,35 @@ This is an experimental implementation of the algorithm in the browser. It is a 
 Test the application in the [Demo](http://katharinaxeniakufieta.github.io/cari/).
 
 ## Dependencies
-No dependencies yet. Will be introduced once I add TypeScript.
+Knockout.js
 
 ### CSS Framework
-The CSS Framework used in this project is [MaterialzeCSS](http://materializecss.com/).
+The CSS Framework used in this project is [MaterialzeCSS](http://materializecss.com/). (EDIT: not yet)
 
 ### JavaScript
-Future versions will use [TypeScript](https://www.typescriptlang.org/index.html). For now it is still pure JavaScript.
+The design of the program is based on MVVM and uses Knockout as a framework.
 
 ## Author
 The code is written by [Katharina Kufieta](https://www.linkedin.com/in/katharinakufieta).
 
 ## In-between steps during the development
-I started developing this program before I knew how to use design patterns, what MVVM is and how to use Knockout.js. Once I learned all that, I needed to refactor the code and incorporate Knockout.js, before I continued adding more features. In order to understand how to use Knockout and the HTML5 Canvas, I developed this small example on JSFiddle: https://jsfiddle.net/katharinaxeniakufieta/ateos0x2/
+1. I started developing this program before I knew how to use design patterns, what MVVM is and how to use Knockout.js. Once I learned all that, I needed to refactor the code and incorporate Knockout.js, before I continued adding more features. In order to understand how to combine Knockout and HTML5 Canvas, I developed this small example on JSFiddle: https://jsfiddle.net/katharinaxeniakufieta/ateos0x2/
 
 ## TO DO
-So far, the user does:
-1) Choose and upload a picture
-2) Define how much to reduce the picture in width (only the input of '1' works as of yet, because the energy around the seam is not recalculated and 
-3) Press "Start Resizing"
+So far the user can follow these steps:
+
+1. Choose and upload a picture
+2. Define how much to reduce the picture in width (only the input of '1' works as of yet, because the energy around the seam is not recalculated and seams are not deleted
+3. Press "Start Resizing"
 
 Given that all inputs were correct, the program then calculates the first seam and displays the energy picture, and pictures with the seam. The resizing does not work yet, because the seam does not get deleted yet, nor is the energy around the seam re-calculated after removing that seam.
 
 The list of To-Dos is as follows:
-1) Re-factor the program into MVVM using Knockout.js before adding features.
-2) Add feature: Picture is automatically compressed by program prior to seam calculation (might be necessary in order to get feasible waiting times).
-3) Add feature: Width and height reduction possible (so far only width reduction is implemented)
-4) Add dragging as a way to resize picture (not only adding number of pixels you want to resize it).
-5) Precalculate 3 versions on how to resize picture: Width, height and diagonally (which could be width & height alternating). Allow the user to decide the direction by dragging the original picture.
-6) Add a % bar to show progress of (pre-) calculations, calculate estimated time until finished and show to the user.
-7) Give option to download resized picture, or even download all pictures (e.g. including seams and energy picture) in a zip file.
+
+1. Re-factor the program into MVVM using Knockout.js before adding features.
+2. Add feature: Picture is automatically compressed by program prior to seam calculation (might be necessary in order to get feasible waiting/processing times).
+3. Add feature: Width and height reduction possible (so far only width reduction is implemented)
+4. Add dragging as a way to resize picture.
+5. Precalculate 3 versions on how to resize picture: Width, height and diagonally (which could be width & height alternating). Allow the user to decide the direction by dragging the original picture.
+6. Add a % bar to show progress of (pre-) calculations, calculate estimated time until finished and show to the user.
+7. Give option to download resized picture, or even download all pictures (e.g. including seams and energy picture) in a zip file.
