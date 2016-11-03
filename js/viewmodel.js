@@ -86,6 +86,8 @@ ko.bindingHandlers.canvas = {
 
 var ViewModel = function() {
   var self = this;
+  this.verticalNumberSeams = ko.observable(0);
+
   this.canvases = ko.observableArray([]);
   imageData.forEach(function(data) {
     var canvas = new CanvasImage(data);
@@ -121,6 +123,10 @@ ViewModel.prototype.handleFile = function(file) {
   // reader.onload function.
   reader.readAsDataURL(file);
 };
+
+ViewModel.prototype.startResizing = function() {
+  console.log('start resizing, number pixels width: ' + this.verticalNumberSeams());
+}
 
 /******************
  * Apply Bindings *
