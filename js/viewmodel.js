@@ -2,15 +2,52 @@ var CanvasImage = function(data) {
   var self = this;
   // Knockout observables of an Image
   this.caption = ko.observable(data.caption);
-  this.imageWidth = ko.observable(30);
-  this.imageHeight = ko.observable(30);
+  this.canvasWidth = ko.observable(30);
+  this.canvasHeight = ko.observable(30);
 
   // Regular variables of an Image
   this.image = new Image();
+
+  // Variables that are going to be set by the custom binding
+  this.canvas = {};
+  this.context = {};
 };
 
 CanvasImage.prototype.drawImage = function() {
   this.context.drawImage(this.image, 0, 0);
+  this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
+  // This drawing compensates for a given canvas margin
+  // this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
+};
+
+// Scales the image accordingly to the maximum canvas size
+// so it will fit into the canvas and keep it's ratio between
+// width and height.
+CanvasImage.prototype.scaleImage = function() {
+  var ratio = this.image.height / this.image.width;
+  if (this.image.height > this.image.width &&
+      this.image.height > MAX_CANVAS_SIZE) {
+    this.canvasHeight(MAX_CANVAS_SIZE);
+    this.canvasWidth(this.canvasHeight() / ratio);
+  } else if (this.image.width > this.image.height &&
+             this.image.width > MAX_CANVAS_SIZE) {
+    this.canvasWidth(MAX_CANVAS_SIZE);
+    this.canvasHeight(ratio * this.canvasWidth());
+  } else {
+    this.canvasHeight(this.image.height);
+    this.canvasWidth(this.image.width);
+  }
+  // Adjust for the canvas margin. The canvas margin
+  // allows the user to resize the image by drag & drop of corners
+  // and borders easier. That is because the margin gives more room to use
+  // the mouse for resizing.
+
+  // this.topLeftX = CANVAS_MARGIN;
+  // this.topLeftY = CANVAS_MARGIN;
+  // this.bottomRightX = this.canvasWidth();
+  // this.bottomRightY = this.canvasHeight();
+  // this.canvasWidth(this.canvasWidth() + CANVAS_MARGIN);
+  // this.canvasHeight(this.canvasHeight() + CANVAS_MARGIN);
 };
 
 /*******************
@@ -34,6 +71,7 @@ ko.bindingHandlers.canvas = {
     viewModel.canvas = $(element)[0];
     viewModel.context = viewModel.canvas.getContext('2d');
 
+    viewModel.scaleImage();
     viewModel.drawImage();
   }
 }
@@ -66,10 +104,10 @@ var ViewModel = function() {
         canvases.forEach(function(canvas) {
           canvas.image.src = e.target.result;
           // set the size of the canvas accordingly to the size of the image
-          canvas.imageWidth(canvas.image.width);
-          canvas.imageHeight(canvas.image.height);
+          canvas.canvasWidth(canvas.image.width);
+          canvas.canvasHeight(canvas.image.height);
           // draw the image in the canvas
-          canvas.context.drawImage(canvas.image, 0, 0);
+          canvas.drawImage();
         })
       };
     })(self.canvases());

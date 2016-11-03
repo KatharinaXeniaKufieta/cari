@@ -1,3 +1,5 @@
+var MAX_CANVAS_SIZE = 500;
+
 var imageData = [
   {
     caption: 'Original picture',
