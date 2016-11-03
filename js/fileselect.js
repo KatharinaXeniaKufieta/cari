@@ -1,25 +1,10 @@
 /**********************************************
  * Handle image input. Show image in canvas.
  *********************************************/
-var MAX_CANVAS_SIZE = 700,
-    doc = document,
-    win = window,
-    image = new Image(),
-    file = {},
-    imagegraph = {},
+var imagegraph = {},
     energyPicture = {},
     pathPicture = {},
     energyPathPicture = {};
-var canvasOriginal = doc.createElement('canvas'),
-    canvasResized = doc.createElement('canvas'),
-    canvasEnergy = doc.createElement('canvas'),
-    canvasPaths = doc.createElement('canvas'),
-    canvasEnergyPaths = doc.createElement('canvas');
-var canvasOriginalDiv = doc.getElementById('canvas-original'),
-    canvasResizedDiv = doc.getElementById('canvas-resized'),
-    canvasEnergyDiv = doc.getElementById('canvas-energy'),
-    canvasPathsDiv = doc.getElementById('canvas-paths'),
-    canvasEnergyPathsDiv = doc.getElementById('canvas-energy-paths');
 var imageHandlerOriginal = {},
     imageHandlerResized = {},
     imageHandlerEnergy = {},
@@ -35,10 +20,6 @@ var verticalNumber = 0,
 // field for images is detected. The list of files handed over to this
 // function can then be accessed through this.files, which is a FileList.
 var handleFiles = function() {
-  file = this.files[0];
-  console.log("file: " + file);
-  console.log("this.files: " + this.files);
-
   // The FileReader object lets web applications asynchronously
   // read the contents of files (or raw data buffers).
   var reader = new FileReader();

@@ -7,6 +7,7 @@ var CanvasImage = function(data) {
 
   // Regular variables of an Image
   this.image = new Image();
+  this.imagegraph = {};
 
   // Variables that are going to be set by the custom binding
   this.canvas = {};
@@ -14,10 +15,13 @@ var CanvasImage = function(data) {
 };
 
 CanvasImage.prototype.drawImage = function() {
-  this.context.drawImage(this.image, 0, 0);
-  this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
-  // This drawing compensates for a given canvas margin
-  // this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
+  if (this.image instanceof Image) {
+    this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
+    // This drawing compensates for a given canvas margin
+    // this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
+  } else if (this.image instanceof ImageData) {
+    this.context.putImageData(this.image, 0, 0);
+  }
 };
 
 // Scales the image accordingly to the maximum canvas size
@@ -90,31 +94,32 @@ var ViewModel = function() {
     canvas.imageLoaded = ko.observable(false);
     self.canvases.push(canvas);
   });
+};
 
-  // Read the file in (given by the user)
-  self.handleFile = function(file) {
-    // The FileReader object lets web applications asynchronously
-    // read the contents of files (or raw data buffers).
-    var reader = new FileReader();
-    // The FileReader.onload function contains an event handler
-    // executed when the load event is fired, which happens when
-    // content read with readAsDataURL is available.
-    reader.onload = (function(canvases) {
-      return function(e) {
-        canvases.forEach(function(canvas) {
-          canvas.image.src = e.target.result;
-          // set the size of the canvas accordingly to the size of the image
-          canvas.canvasWidth(canvas.image.width);
-          canvas.canvasHeight(canvas.image.height);
-          // draw the image in the canvas
-          canvas.drawImage();
-        })
-      };
-    })(self.canvases());
-    // Start reading the data from file, when ready call the
-    // reader.onload function.
-    reader.readAsDataURL(file);
-  };
+// Read the file in (given by the user)
+ViewModel.prototype.handleFile = function(file) {
+  var self = this;
+  // The FileReader object lets web applications asynchronously
+  // read the contents of files (or raw data buffers).
+  var reader = new FileReader();
+  // The FileReader.onload function contains an event handler
+  // executed when the load event is fired, which happens when
+  // content read with readAsDataURL is available.
+  reader.onload = (function(canvases) {
+    return function(e) {
+      canvases.forEach(function(canvas) {
+        canvas.image.src = e.target.result;
+        // set the size of the canvas accordingly to the size of the image
+        canvas.canvasWidth(canvas.image.width);
+        canvas.canvasHeight(canvas.image.height);
+        // draw the image in the canvas
+        canvas.drawImage();
+      })
+    };
+  })(self.canvases());
+  // Start reading the data from file, when ready call the
+  // reader.onload function.
+  reader.readAsDataURL(file);
 };
 
 /******************
