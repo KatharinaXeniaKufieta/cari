@@ -1,17 +1,12 @@
 var CanvasImage = function(data) {
   var self = this;
   // Knockout observables of an Image
-  this.id = ko.observable(data.id);
   this.caption = ko.observable(data.caption);
   this.imageWidth = ko.observable(30);
   this.imageHeight = ko.observable(30);
 
+  // Regular variables of an Image
   this.image = new Image();
-  this.image.src = data.src;
-};
-
-CanvasImage.prototype.setImage = function(imageSource) {
-  this.image.src = imageSource;
 };
 
 CanvasImage.prototype.drawImage = function() {
@@ -28,7 +23,7 @@ ko.bindingHandlers.canvas = {
 
     // Next, whether or not the supplied model property is observable, get its current value
     var valueUnwrapped = ko.unwrap(value);
-    console.log('valueUnwrapped (loadedImage): ' + valueUnwrapped);
+    console.log('valueUnwrapped (imageLoaded): ' + valueUnwrapped);
 
     // Grab some more data from another binding property
     var width = allBindings().attr.width();
@@ -49,13 +44,13 @@ ko.bindingHandlers.canvas = {
 
 var ViewModel = function() {
   var self = this;
-  this.images = ko.observableArray([]);
-  images.forEach(function(image) {
-    var image = new CanvasImage(image);
+  this.canvases = ko.observableArray([]);
+  imageData.forEach(function(data) {
+    var canvas = new CanvasImage(data);
     // image.getContext();
     // image.drawImage();
-    image.loadedImage = ko.observable(false);
-    self.images.push(image);
+    canvas.imageLoaded = ko.observable(false);
+    self.canvases.push(canvas);
   });
 
   // Read the file in (given by the user)
@@ -66,18 +61,18 @@ var ViewModel = function() {
     // The FileReader.onload function contains an event handler
     // executed when the load event is fired, which happens when
     // content read with readAsDataURL is available.
-    reader.onload = (function(images) {
+    reader.onload = (function(canvases) {
       return function(e) {
-        images.forEach(function(img) {
-          img.image.src = e.target.result;
+        canvases.forEach(function(canvas) {
+          canvas.image.src = e.target.result;
           // set the size of the canvas accordingly to the size of the image
-          img.imageWidth(img.image.width);
-          img.imageHeight(img.image.height);
+          canvas.imageWidth(canvas.image.width);
+          canvas.imageHeight(canvas.image.height);
           // draw the image in the canvas
-          img.context.drawImage(img.image, 0, 0);
+          canvas.context.drawImage(canvas.image, 0, 0);
         })
       };
-    })(self.images());
+    })(self.canvases());
     // Start reading the data from file, when ready call the
     // reader.onload function.
     reader.readAsDataURL(file);
