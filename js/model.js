@@ -2,15 +2,19 @@ var MAX_CANVAS_SIZE = 500;
 
 var imageData = [
   {
-    caption: 'Original picture',
+    id: 'original',
+    caption: 'Original picture'
   }, {
-    caption: 'Resized picture',
+    id: 'resized',
+    caption: 'Resized picture'
   }, {
-    caption: 'Energy picture',
+    id: 'energy',
+    caption: 'Energy picture'
   }, {
-    caption: 'Picture shows seams that are deleted',
+    id: 'seams',
+    caption: 'Picture shows seams that are deleted'
   }, {
-    caption: 'Energy paths picture',
+    id: 'energySeams',
+    caption: 'Energy picture shows seams that are deleted'
   }
 ];
-

@@ -8,21 +8,13 @@ var CanvasImage = function(data) {
   // Regular variables of an Image
   this.image = new Image();
   this.imagegraph = {};
+  this.id = data.id;
 
   // Variables that are going to be set by the custom binding
   this.canvas = {};
   this.context = {};
 };
 
-CanvasImage.prototype.drawImage = function() {
-  if (this.image instanceof Image) {
-    this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
-    // This drawing compensates for a given canvas margin
-    // this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
-  } else if (this.image instanceof ImageData) {
-    this.context.putImageData(this.image, 0, 0);
-  }
-};
 
 // Scales the image accordingly to the maximum canvas size
 // so it will fit into the canvas and keep it's ratio between
@@ -54,6 +46,23 @@ CanvasImage.prototype.scaleImage = function() {
   // this.canvasHeight(this.canvasHeight() + CANVAS_MARGIN);
 };
 
+CanvasImage.prototype.drawImage = function() {
+  if (this.image instanceof Image) {
+    console.log('draw Image');
+    this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
+    // This drawing compensates for a given canvas margin
+    // this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
+  } else if (this.image instanceof ImageData) {
+    console.log('draw ImageData');
+    this.context.putImageData(this.image, 0, 0);
+  }
+};
+
+CanvasImage.prototype.clearCanvas = function() {
+  this.context.fillStyle = 'rgb(235, 240, 255)';
+  this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
+}
+
 /*******************
  * Custom Bindings *
  *******************/
@@ -62,7 +71,8 @@ ko.bindingHandlers.canvas = {
     // First get the latest data that we're bound to
     var value = valueAccessor();
 
-    // Next, whether or not the supplied model property is observable, get its current value
+    // Next, whether or not the supplied model property is observable, get its
+    // current value.
     var valueUnwrapped = ko.unwrap(value);
     console.log('valueUnwrapped (imageLoaded): ' + valueUnwrapped);
 
@@ -75,15 +85,16 @@ ko.bindingHandlers.canvas = {
     viewModel.canvas = $(element)[0];
     viewModel.context = viewModel.canvas.getContext('2d');
 
-    viewModel.scaleImage();
-    viewModel.drawImage();
+    if (viewModel.imageLoaded()) {
+      viewModel.scaleImage();
+      viewModel.drawImage();
+    }
   }
 }
 
 /**************
  * ViewModel  *
  **************/
-
 var ViewModel = function() {
   var self = this;
   this.verticalNumberSeams = ko.observable(0);
@@ -91,14 +102,13 @@ var ViewModel = function() {
   this.canvases = ko.observableArray([]);
   imageData.forEach(function(data) {
     var canvas = new CanvasImage(data);
-    // image.getContext();
-    // image.drawImage();
     canvas.imageLoaded = ko.observable(false);
     self.canvases.push(canvas);
   });
 };
 
-// Read the file in (given by the user)
+// handleFile is called by an event listener when a change in the input
+// field for images is detected.
 ViewModel.prototype.handleFile = function(file) {
   var self = this;
   // The FileReader object lets web applications asynchronously
@@ -110,13 +120,26 @@ ViewModel.prototype.handleFile = function(file) {
   reader.onload = (function(canvases) {
     return function(e) {
       canvases.forEach(function(canvas) {
-        canvas.image.src = e.target.result;
-        // set the size of the canvas accordingly to the size of the image
-        canvas.canvasWidth(canvas.image.width);
-        canvas.canvasHeight(canvas.image.height);
-        // draw the image in the canvas
-        canvas.drawImage();
-      })
+        canvas.imageLoaded(false);
+        canvas.clearCanvas();
+        if (canvas.id === 'original') {
+          // set the image source for the original image canvas
+          // draw the image on the original image canvas
+          canvas.image.src = e.target.result;
+          canvas.imageLoaded(true);
+          // create the imagegraph from the uploaded image
+          self.imagegraph = new Imagegraph(canvas.image, canvas.context);
+          // calculate the energy picture
+          self.energyPicture = self.imagegraph.energyPicture();
+        }
+      });
+      canvases.forEach(function(canvas) {
+        if (canvas.id === 'energy') {
+          // draw the energy picture on the energy image
+          canvas.image = self.energyPicture;
+          canvas.imageLoaded(true);
+        }
+      });
     };
   })(self.canvases());
   // Start reading the data from file, when ready call the
@@ -125,7 +148,26 @@ ViewModel.prototype.handleFile = function(file) {
 };
 
 ViewModel.prototype.startResizing = function() {
+  var self = this;
   console.log('start resizing, number pixels width: ' + this.verticalNumberSeams());
+  this.pathPicture = this.imagegraph.pathPicture();
+  this.energyPathPicture = this.imagegraph.energyPicture();
+  for (var remove = 0; remove < this.verticalNumberSeams(); remove++) {
+    var verticalMinPath = this.imagegraph.getVerticalMinPath();
+    console.log("verticalMinPath: " + verticalMinPath);
+    this.imagegraph.addPaths(this.pathPicture, verticalMinPath);
+    this.imagegraph.addPaths(this.energyPathPicture, verticalMinPath);
+    this.imagegraph.removePath(verticalMinPath);
+  }
+  this.canvases().forEach(function(canvas) {
+    if (canvas.id === 'seams') {
+      canvas.image = self.pathPicture;
+      canvas.imageLoaded(true);
+    } else if (canvas.id === 'energySeams') {
+      canvas.image = self.energyPathPicture;
+      canvas.imageLoaded(true);
+    }
+  });
 }
 
 /******************

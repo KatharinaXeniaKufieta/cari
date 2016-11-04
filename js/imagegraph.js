@@ -2,11 +2,11 @@
  * Imagegraph class: Get data from uploaded picture,
  * create graph, run seamcarver on it
  *********************************************/
-var Imagegraph = function(image, ctx) {
+var Imagegraph = function(image, context) {
   // ImageData: Reading and writing a data
   // array to manipulate pixel data.
   console.log("image width, height: " + image.width + ", " + image.height);
-  this.ctx = ctx;
+  this.ctx = context;
   this.imageData = this.ctx.getImageData(0, 0, image.width, image.height);
   this.width = this.imageData.width;
   this.height = this.imageData.height;
