@@ -25,7 +25,7 @@ CanvasImage.prototype.scaleImage = function() {
       this.image.height > MAX_CANVAS_SIZE) {
     this.canvasHeight(MAX_CANVAS_SIZE);
     this.canvasWidth(this.canvasHeight() / ratio);
-  } else if (this.image.width > this.image.height &&
+  } else if (this.image.width >= this.image.height &&
              this.image.width > MAX_CANVAS_SIZE) {
     this.canvasWidth(MAX_CANVAS_SIZE);
     this.canvasHeight(ratio * this.canvasWidth());
