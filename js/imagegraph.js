@@ -2,12 +2,13 @@
  * Imagegraph class: Get data from uploaded picture,
  * create graph, run seamcarver on it
  *********************************************/
-var Imagegraph = function(image, context) {
+var Imagegraph = function(canvas) {
+  var image = canvas.image;
+  var context = canvas.context;
   // ImageData: Reading and writing a data
   // array to manipulate pixel data.
-  console.log("image width, height: " + image.width + ", " + image.height);
-  this.ctx = context;
-  this.imageData = this.ctx.getImageData(0, 0, image.width, image.height);
+  this.context = context;
+  this.imageData = this.context.getImageData(0, 0, canvas.canvasWidth(), canvas.canvasHeight());
   this.width = this.imageData.width;
   this.height = this.imageData.height;
   // ImageData.data : Uint8ClampedArray represents a 1-dim array
@@ -15,6 +16,20 @@ var Imagegraph = function(image, context) {
   // between 0 and 255 (included).
   this.pixels = [];
   this.setPixelArray();
+};
+
+Imagegraph.prototype.calculateVerticalSeams = function() {
+  // precalculate vertical seams from max width to width 1 of image
+}
+
+Imagegraph.prototype.calculateHorizontalSeams = function() {
+  // precalculate horizontal seams from max width to width 1 of image
+}
+
+Imagegraph.prototype.calculateVerticalSeams = function() {
+  // precalculate vertical seams (change between horizontal & vertical)
+  // from width & height 1 to either width or height 1 (depending
+// on which one is smaller, it will reach width / height of 1 faster)
 }
 
 /*
@@ -183,7 +198,7 @@ Imagegraph.prototype.calculateEnergy = function(col, row) {
  * Create picture where the seams are highlighted in red
  */
 Imagegraph.prototype.pathPicture = function() {
-  var pathPicture = this.ctx.createImageData(this.imageData);
+  var pathPicture = this.context.createImageData(this.imageData);
   var data = pathPicture.data;
   for (var col = 0; col < this.width; col++){
     for (var row = 0; row < this.height; row++) {
@@ -245,7 +260,7 @@ Imagegraph.prototype.getEnergy = function(col, row) {
  * creation of the pixel array which makes it faster.
  */
 Imagegraph.prototype.energyPicture = function() {
-  var energyPicture = this.ctx.createImageData(this.imageData);
+  var energyPicture = this.context.createImageData(this.imageData);
   var data = energyPicture.data;
   var maxVal = 0;
   var stringEnergy = "";

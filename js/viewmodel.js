@@ -128,7 +128,7 @@ ViewModel.prototype.handleFile = function(file) {
           canvas.image.src = e.target.result;
           canvas.imageLoaded(true);
           // create the imagegraph from the uploaded image
-          self.imagegraph = new Imagegraph(canvas.image, canvas.context);
+          self.imagegraph = new Imagegraph(canvas);
           // calculate the energy picture
           self.energyPicture = self.imagegraph.energyPicture();
         }
@@ -177,4 +177,3 @@ ViewModel.prototype.startResizing = function() {
 window.onload = function() {
   ko.applyBindings(new ViewModel());
 };
-
