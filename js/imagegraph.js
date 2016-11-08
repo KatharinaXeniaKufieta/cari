@@ -2,257 +2,135 @@
  * Imagegraph class: Get data from uploaded picture,
  * create graph, run seamcarver on it
  *********************************************/
-var Imagegraph = function(canvas) {
-  var image = canvas.image;
-  var context = canvas.context;
-  // ImageData: Reading and writing a data
-  // array to manipulate pixel data.
-  this.context = context;
+var Imagegraph = function() {
+  this.context = {};
+  this.imageData = {};
+  this.width = {};
+  this.height = {};
+  this.pixelArray = [];
+}
+
+/***********************************************
+ * Methods to construct Imagegraph from a canvas
+ **********************************************/
+Imagegraph.prototype.constructFromCanvas = function(canvas) {
+  this.context = canvas.context;
   this.imageData = this.context.getImageData(0, 0, canvas.canvasWidth(), canvas.canvasHeight());
   this.width = this.imageData.width;
   this.height = this.imageData.height;
   // ImageData.data : Uint8ClampedArray represents a 1-dim array
   // containing the data in the RGBA order, with integer values
   // between 0 and 255 (included).
-  this.pixels = [];
+  this.pixelArray = [];
+  // populate the pixels array with the pixels from the image that is saved in
+  // the canvas
   this.setPixelArray();
 };
 
-Imagegraph.prototype.calculateVerticalSeams = function() {
-  // precalculate vertical seams from max width to width 1 of image
-}
 
-Imagegraph.prototype.calculateHorizontalSeams = function() {
-  // precalculate horizontal seams from max width to width 1 of image
-}
-
-Imagegraph.prototype.calculateVerticalSeams = function() {
-  // precalculate vertical seams (change between horizontal & vertical)
-  // from width & height 1 to either width or height 1 (depending
-// on which one is smaller, it will reach width / height of 1 faster)
-}
 
 /*
  * Create pixel object for every pixel in picture, calculate
  * its energy and save it. All pixels are saved in the array
- * this.pixels and contains its energy, a pointer to the pixel
- * above it and the distance so far traveled when searching for
+ * this.pixelArray and contains its energy, a pointer to the pixel
+ * above it and the distance traveled when searching for
  * paths.
  */
 Imagegraph.prototype.setPixelArray = function() {
-  var stringPixels = "";
-  console.log("-------------------- Energy of the picture : --------------------");
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
-      this.pixels.push(this.getPixel(col, row));
-      if (col == this.width - 1) {
-        stringPixels += this.getPixel(col, row).toString();
-      } else {
-        stringPixels += this.getPixel(col, row).toString() + ", ";
-      }
+      this.pixelArray.push(this.getPixel(col, row));
     }
-    console.log(stringPixels);
-    stringPixels = "";
   }
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
       var energy = this.calculateEnergy(col, row);
-      this.pixels[this.getIndex(col, row)].setEnergy(energy);
+      this.pixelArray[this.getIndex(col, row)].setEnergy(energy);
     }
   }
-  console.log("-----------------------------------------------------------------");
-}
+  // For debugging purposes, print the array:
+  // this.printPixelArray();
+};
 
-/*
- * Return the pixel at the specified column and row.
-*/
-Imagegraph.prototype.getPixel = function(col, row) {
-  var startIndex = row * this.width * 4 + col * 4;
-  var red = this.imageData.data[startIndex],
-      green = this.imageData.data[startIndex + 1],
-      blue = this.imageData.data[startIndex + 2],
-      alpha = this.imageData.data[startIndex + 3];
-  return new Pixel(col, row, new Color(red, green, blue, alpha));
-}
-
-
-/*
- * Find vertical seam
- */
-Imagegraph.prototype.getVerticalMinPath = function() {
-  var newPixel = {};
-  // queue of pixels that need to be processed to find the
-  // shortest path
-  var queue = new Array();
-  var currentPixel = {};
-  // minimum Distance that will help to find the shortest
-  // path
-  var minDist = Number.POSITIVE_INFINITY;
-  // hold on to the last pixel that belongs to the minimum path
-  var minEndPixel = -1;
-  // Array of indices of the minimum path
-  minPath = new Array();
-
-  // Add the top row of pixels to the queue
-  for (var i = 0; i < this.width; i++) {
-    queue.unshift(this.pixels[i]);
-    this.pixels[i].marked = true;
-    this.pixels[i].cost = this.pixels[i].energy;
-  }
-  while (queue[0] != null) {
-    currentPixel = queue.pop();
-    if (currentPixel.row < this.height - 1) {
-      var row = currentPixel.row + 1;
-      for (var col = currentPixel.col - 1; col <= currentPixel.col + 1; col++) {
-        if (col >= 0 && col < this.width) {
-          newPixel = this.pixels[this.getIndex(col, row)];
-          if (!newPixel.marked) {
-            newPixel.cost = currentPixel.cost + newPixel.energy;
-            newPixel.prior = currentPixel;
-            newPixel.marked = true;
-            queue.unshift(newPixel);
-          } else if (newPixel.cost > currentPixel.cost + newPixel.energy) {
-            var index = queue.indexOf(newPixel);
-            newPixel.cost = currentPixel.cost + newPixel.energy;
-            newPixel.prior = currentPixel;
-            queue[index] = newPixel;
-          } else {
-            // "Pixel is already in queue and the new cost is not lower");
-          }
-        }
-      }
-    } else {
-      if (currentPixel.cost < minDist) {
-        minDist = currentPixel.cost;
-        minEndPixel = currentPixel;
-      }
-    }
-  }
-  console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
-  var counter = 0;
-  while (minEndPixel != null) {
-    counter++;
-    minPath.unshift(minEndPixel.col);
-    minEndPixel = minEndPixel.prior;
-  }
-  this.printPath(minPath);
-  return minPath;
-}
-
-// Print the path in the console
-Imagegraph.prototype.printPath = function(minPath) {
-  console.log("-------------------- Vertical seam : --------------------");
-  var stringPath = "Vertical seam : { ";
-  for (var i = 0; i < minPath.length; i++) {
-    stringPath += minPath[i] + " ";
-  }
-  stringPath += "}";
-  console.log(stringPath);
-  stringPath = "";
+Imagegraph.prototype.resetPixelArray = function() {
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
-      if (col === minPath[row]) {
-        stringPath += this.getEnergy(col, row).toFixed(2) + "* ";
-      } else {
-        stringPath += this.getEnergy(col, row).toFixed(2) + "  ";
-      }
+      this.pixelArray[this.getIndex(col, row)].reset();
     }
-    console.log(stringPath);
-    stringPath = "";
   }
-  console.log("---------------------------------------------------------");
-}
+};
 
 
+/***********************************************
+ * Methods to construct Imagegraph from another
+ * Imagegraph
+ **********************************************/
+// copy the original pixels array into the resizedPixels array
+Imagegraph.prototype.copy = function(imagegraph) {
+  // this.context = {};
+  this.width = imagegraph.width;
+  this.height = imagegraph.height;
+  // clear the pixelArray in case it was populated from before
+  this.pixelArray = [];
+  this.imageData = new ImageData(imagegraph.imageData.data, this.width, this.height);
+  for (var i = 0, max = imagegraph.pixelArray.length; i < max; i++) {
+    this.pixelArray[i] = imagegraph.pixelArray[i];
+  }
+};
+
+/******************
+ * General Methods
+ *****************/
 /*
  * Calculate the energy of the pixel at a specified column
  * and row.
- * PREREQUISITE: The Pixel array this.pixel has to be correctly
- * defined before calling this function.
  */
 Imagegraph.prototype.calculateEnergy = function(col, row) {
-  if (col === 0 || row === 0 || col === this.width - 1 ||
-      row === this.height - 1) {
-    return 1000;
-  }
-  var pixelAbove = this.pixels[this.getIndex(col, row - 1)],
-      pixelBelow = this.pixels[this.getIndex(col, row + 1)],
-      pixelLeft = this.pixels[this.getIndex(col - 1, row)],
-      pixelRight = this.pixels[this.getIndex(col + 1, row)];
-
-  var redX = pixelRight.color.red - pixelLeft.color.red,
-      greenX = pixelRight.color.green - pixelLeft.color.green,
-      blueX = pixelRight.color.blue - pixelLeft.color.blue;
-  var redY = pixelBelow.color.red - pixelAbove.color.red,
-      greenY = pixelBelow.color.green - pixelAbove.color.green,
-      blueY = pixelBelow.color.blue - pixelAbove.color.blue;
-  var xGradientSquared = redX * redX + greenX * greenX + blueX * blueX,
-      yGradientSquared = redY * redY + greenY * greenY + blueY * blueY;
-  var energy = Math.sqrt(xGradientSquared + yGradientSquared);
-
-  return energy;
-}
-
-
-/*
- * Create picture where the seams are highlighted in red
- */
-Imagegraph.prototype.pathPicture = function() {
-  var pathPicture = this.context.createImageData(this.imageData);
-  var data = pathPicture.data;
-  for (var col = 0; col < this.width; col++){
-    for (var row = 0; row < this.height; row++) {
-      var energy = this.getEnergy(col, row);
-      energy = Math.floor(energy / 1000 * 255);
-      var startIndex = row * this.width * 4 + col * 4;
-      data[startIndex] = this.imageData.data[startIndex];
-      data[startIndex + 1] = this.imageData.data[startIndex + 1];
-      data[startIndex + 2] = this.imageData.data[startIndex + 2];
-      data[startIndex + 3] = this.imageData.data[startIndex + 3]; // alpha
+  if (this.pixelArray.length > 0) {
+    if (col === 0 || row === 0 || col === this.width - 1 ||
+        row === this.height - 1) {
+      return 1000;
     }
-  }
-  return pathPicture;
-}
+    var pixelAbove = this.pixelArray[this.getIndex(col, row - 1)],
+        pixelBelow = this.pixelArray[this.getIndex(col, row + 1)],
+        pixelLeft = this.pixelArray[this.getIndex(col - 1, row)],
+        pixelRight = this.pixelArray[this.getIndex(col + 1, row)];
 
-/*
- * Add paths in red to pathPicture
- */
-Imagegraph.prototype.addPaths = function(pathPicture, path) {
-  console.log("path: " + path);
-  var data = pathPicture.data;
-  // add path to picture
-  for (var row = 0; row < this.height; row++) {
-    var col = path[row];
-    var startIndex = row * this.width * 4 + col * 4;
-    data[startIndex] = 255;
-    data[startIndex + 1] = 0;
-    data[startIndex + 2] = 0;
-    data[startIndex + 3] = 255; // alpha
-  }
-  // add path to data, make it red and return picture
-  return pathPicture;
-}
+    var redX = pixelRight.color.red - pixelLeft.color.red,
+        greenX = pixelRight.color.green - pixelLeft.color.green,
+        blueX = pixelRight.color.blue - pixelLeft.color.blue;
+    var redY = pixelBelow.color.red - pixelAbove.color.red,
+        greenY = pixelBelow.color.green - pixelAbove.color.green,
+        blueY = pixelBelow.color.blue - pixelAbove.color.blue;
+    var xGradientSquared = redX * redX + greenX * greenX + blueX * blueX,
+        yGradientSquared = redY * redY + greenY * greenY + blueY * blueY;
+    var energy = Math.sqrt(xGradientSquared + yGradientSquared);
 
-/*
- * Remove the path from the minimized picture
- */
-Imagegraph.prototype.removePath = function(path) {
-  // just remove it.
-}
+    return energy;
+  } else {
+    throw new EmptyPixelArrayException();
+  }
+};
+
 
 /*
  * Return the index for the given row and column.
  */
 Imagegraph.prototype.getIndex = function(col, row) {
   return row * this.width + col;
-}
+};
 
 /*
  * Return the energy of the pixel at the given row and column.
  */
 Imagegraph.prototype.getEnergy = function(col, row) {
-  return this.pixels[this.getIndex(col, row)].energy;
+  if (this.pixelArray.length > 0) {
+    return this.pixelArray[this.getIndex(col, row)].energy;
+  } else {
+    throw new EmptyPixelArrayException();
+  }
 }
+
 
 /*
  * Create the energy picture by calculating the energy of each
@@ -260,13 +138,13 @@ Imagegraph.prototype.getEnergy = function(col, row) {
  * creation of the pixel array which makes it faster.
  */
 Imagegraph.prototype.energyPicture = function() {
-  var energyPicture = this.context.createImageData(this.imageData);
+  var energyPicture = new ImageData(this.imageData.data, this.width, this.height);
   var data = energyPicture.data;
   var maxVal = 0;
   var stringEnergy = "";
-  console.log("-------------------- Energy of the picture : --------------------");
+  // console.log("-------------------- Energy of the picture : --------------------");
   for (var row = 0; row < this.height; row++) {
-    for (var col = 0; col < this.width; col++){
+    for (var col = 0; col < this.width; col++) {
       var energy = this.getEnergy(col, row);
       if (col == this.width - 1) {
         stringEnergy += energy.toFixed(2);
@@ -285,10 +163,10 @@ Imagegraph.prototype.energyPicture = function() {
       data[startIndex + 2] = energy;
       data[startIndex + 3] = 255; // alpha
     }
-    console.log(stringEnergy);
-    stringEnergy = "";
+    // console.log(stringEnergy);
+    // stringEnergy = "";
   }
-  console.log("-----------------------------------------------------------------");
+  // console.log("-----------------------------------------------------------------");
   // if the picture is black, return it
   if (maxVal === 0) {
     return energyPicture;
@@ -296,7 +174,7 @@ Imagegraph.prototype.energyPicture = function() {
   console.log("maxVal: " + maxVal);
   // normalize picture
   for (var row = 1; row < this.height - 1; row++) {
-    for (var col = 1; col < this.width - 1; col++){
+    for (var col = 1; col < this.width - 1; col++) {
       var energy = this.getEnergy(col, row);
       energy = Math.floor(energy / maxVal * 255);
       var startIndex = row * this.width * 4 + col * 4;
@@ -309,22 +187,50 @@ Imagegraph.prototype.energyPicture = function() {
   return energyPicture;
 }
 
-/*
- * Create picture where the seams are highlighted in red
- */
-Imagegraph.prototype.pathEnergyPicture = function() {
-  var pathEnergyPicture = this.energyPicture();
-  var data = pathEnergyPicture.data;
-  for (var col = 0; col < this.width; col++){
-    for (var row = 0; row < this.height; row++) {
-      var energy = this.getEnergy(col, row);
-      energy = Math.floor(energy / 1000 * 255);
-      var startIndex = row * this.width * 4 + col * 4;
-      data[startIndex] = this.imageData.data[startIndex];
-      data[startIndex + 1] = this.imageData.data[startIndex + 1];
-      data[startIndex + 2] = this.imageData.data[startIndex + 2];
-      data[startIndex + 3] = this.imageData.data[startIndex + 3]; // alpha
-    }
-  }
-  return pathEnergyPicture;
+Imagegraph.prototype.picture = function() {
+  var picture = new ImageData(this.imageData.data, this.width, this.height);
+  return picture;
 }
+
+/*
+ * Return the pixel at the specified column and row.
+ */
+Imagegraph.prototype.getPixel = function(col, row) {
+  var startIndex = row * this.width * 4 + col * 4;
+  var red = this.imageData.data[startIndex],
+      green = this.imageData.data[startIndex + 1],
+      blue = this.imageData.data[startIndex + 2],
+      alpha = this.imageData.data[startIndex + 3];
+  return new Pixel(col, row, new Color(red, green, blue, alpha));
+};
+
+// For debugging purposes: Print pixels of the image (RGB values)
+Imagegraph.prototype.printPixelArray = function() {
+  if (this.pixelArray === undefined) {
+    console.log('pixelArray is undefined ,can not print its values');
+  } else {
+    var stringPixels = "";
+    console.log("-------------------- Energy of the picture : ---------------");
+    for (var row = 0; row < this.height; row++) {
+      for (var col = 0; col < this.width; col++) {
+        if (col == this.width - 1) {
+          stringPixels += this.getPixel(col, row).toString();
+        } else {
+          stringPixels += this.getPixel(col, row).toString() + ", ";
+        }
+      }
+      console.log(stringPixels);
+      stringPixels = "";
+    }
+    console.log("------------------------------------------------------------");
+  }
+};
+
+// Exceptions
+function EmptyPixelArrayException() {
+  this.message = "PixelArray is empty";
+};
+
+function EmptyObjectException() {
+  this.message = "Object is empty";
+};

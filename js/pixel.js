@@ -60,3 +60,9 @@ Pixel.prototype.toString = function() {
       "), " + this.color.toString();
   return stringPixel;
 }
+
+Pixel.prototype.reset = function() {
+  this.marked = false;
+  this.cost = null;
+  this.prior = null;
+}

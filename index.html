@@ -23,7 +23,7 @@
         </div>
         <div class="col s3 m3 l3">
           <p>Reduce the picture width (in pixels): </p>
-          <input data-bind="value: verticalNumberSeams" type="number">
+          <input data-bind="value: numberVerticalSeams" type="number">
         </div>
         <div class="col s3 m3 l3">
           <button data-bind="click: startResizing" name="Start">Start resizing</button>
@@ -40,8 +40,10 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+    <script src="js/helperfunctions.js"></script>
     <script src="js/pixel.js"></script>
     <script src="js/imagegraph.js"></script>
+    <script src="js/seamcarver.js"></script>
     <script src="js/lib/knockout-3.2.0.js"></script>
     <script src="js/model.js"></script>
     <script src="js/viewmodel.js"></script>

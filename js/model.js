@@ -8,8 +8,8 @@ var imageData = [
     id: 'resized',
     caption: 'Resized picture'
   }, {
-    id: 'energy',
-    caption: 'Energy picture'
+    id: 'resizedEnergy',
+    caption: 'Resized energy picture'
   }, {
     id: 'seams',
     caption: 'Picture shows seams that are deleted'

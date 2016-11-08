@@ -6,9 +6,8 @@ var CanvasImage = function(data) {
   this.canvasHeight = ko.observable(30);
 
   // Regular variables of an Image
-  this.image = new Image();
-  this.imagegraph = {};
   this.id = data.id;
+  this.image = new Image();
 
   // Variables that are going to be set by the custom binding
   this.canvas = {};
@@ -97,9 +96,14 @@ ko.bindingHandlers.canvas = {
  **************/
 var ViewModel = function() {
   var self = this;
-  this.verticalNumberSeams = ko.observable(0);
+  this.numberVerticalSeams = ko.observable(0);
+
+  // Variables that are going to be set by the custom binding
+  this.seamcarver = {};
+  this.energyPicture = {};
 
   this.canvases = ko.observableArray([]);
+  // imageData is the data saved in model.js
   imageData.forEach(function(data) {
     var canvas = new CanvasImage(data);
     canvas.imageLoaded = ko.observable(false);
@@ -127,17 +131,8 @@ ViewModel.prototype.handleFile = function(file) {
           // draw the image on the original image canvas
           canvas.image.src = e.target.result;
           canvas.imageLoaded(true);
-          // create the imagegraph from the uploaded image
-          self.imagegraph = new Imagegraph(canvas);
-          // calculate the energy picture
-          self.energyPicture = self.imagegraph.energyPicture();
-        }
-      });
-      canvases.forEach(function(canvas) {
-        if (canvas.id === 'energy') {
-          // draw the energy picture on the energy image
-          canvas.image = self.energyPicture;
-          canvas.imageLoaded(true);
+          // start seamcarver from the uploaded image
+          self.seamcarver = new Seamcarver(canvas);
         }
       });
     };
@@ -149,22 +144,22 @@ ViewModel.prototype.handleFile = function(file) {
 
 ViewModel.prototype.startResizing = function() {
   var self = this;
-  console.log('start resizing, number pixels width: ' + this.verticalNumberSeams());
-  this.pathPicture = this.imagegraph.pathPicture();
-  this.energyPathPicture = this.imagegraph.energyPicture();
-  for (var remove = 0; remove < this.verticalNumberSeams(); remove++) {
-    var verticalMinPath = this.imagegraph.getVerticalMinPath();
-    console.log("verticalMinPath: " + verticalMinPath);
-    this.imagegraph.addPaths(this.pathPicture, verticalMinPath);
-    this.imagegraph.addPaths(this.energyPathPicture, verticalMinPath);
-    this.imagegraph.removePath(verticalMinPath);
-  }
+  console.log('start resizing, number pixels width: ' + this.numberVerticalSeams());
+
+  this.seamcarver.resizeWidth(this.numberVerticalSeams());
+
   this.canvases().forEach(function(canvas) {
-    if (canvas.id === 'seams') {
-      canvas.image = self.pathPicture;
+    if (canvas.id === 'resizedEnergy') {
+      canvas.image = self.seamcarver.resizedEnergyPicture();
+      canvas.imageLoaded(true);
+    } else if (canvas.id === 'seams') {
+      canvas.image = self.seamcarver.pathPicture();
       canvas.imageLoaded(true);
     } else if (canvas.id === 'energySeams') {
-      canvas.image = self.energyPathPicture;
+      canvas.image = self.seamcarver.energyPathPicture();
+      canvas.imageLoaded(true);
+    } else if (canvas.id === 'resized') {
+      canvas.image = self.seamcarver.resizedPicture();
       canvas.imageLoaded(true);
     }
   });
