@@ -29,7 +29,9 @@ var Seamcarver = function(canvas) {
 
 Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
   this.seams = [];
+  this.resizedImage = new Imagegraph();
   this.resizedImage.copy(this.originalImage);
+
   for (var seam = 0; seam < numberVerticalSeams; seam++) {
     var verticalMinPath = this.getVerticalMinPath();
     console.log("verticalMinPath: " + verticalMinPath);
@@ -102,6 +104,9 @@ Seamcarver.prototype.getVerticalMinPath = function() {
     minEndPixel = minEndPixel.prior;
   }
   this.printPath(minPath);
+  if (minPath.length != this.resizedImage.height) {
+    throw new NoPathFoundException();
+  }
   return minPath;
 };
 
@@ -109,40 +114,60 @@ Seamcarver.prototype.getVerticalMinPath = function() {
  * Remove the path from the minimized picture
  */
 Seamcarver.prototype.removeVerticalPath = function(path) {
+  var width = this.resizedImage.width;
+  var height = this.resizedImage.height;
   if (path === undefined) {
     console.log('no path');
   }
+  console.log('pixelArray: ');
+  printPixelArray(this.resizedImage.pixelArray, width, height);
+  console.log('imageData: ');
+  var data = this.resizedImage.imageData.data;
+  printUint8(data, width, height);
   var adjustIndex = 0;
-  var index, startIndex;
-  for (var row = 0; row < this.resizedImage.height; row++) {
-    for (var col = 0; col < this.resizedImage.width; col++) {
-      if (path[row] === col) {
+  var index, startIndex, adjustedIndex, adjustedRow, adjustedCol;
+  for (var row = 0; row < height; row++) {
+    for (var col = 0; col < width; col++) {
+      index = this.resizedImage.getIndex(col, row);
+      adjustedIndex = index + adjustIndex;
+      adjustedRow = Math.floor(adjustedIndex / width);
+      adjustedCol = adjustedIndex % width;
+      if (path[adjustedRow] === adjustedCol) {
         adjustIndex++;
       }
-      index = this.resizedImage.getIndex(col, row);
       this.resizedImage.pixelArray[index] = this.resizedImage.pixelArray[index + adjustIndex];
 
-      var data = this.resizedImage.imageData.data;
-      startIndex = row * this.resizedImage.width * 4 + col * 4;
+      // var data = this.resizedImage.imageData.data;
+      startIndex = row * width * 4 + col * 4;
       data[startIndex] = data[startIndex + adjustIndex * 4];
       data[startIndex + 1] = data[startIndex + 1 + adjustIndex * 4];
       data[startIndex + 2] = data[startIndex + 2 + adjustIndex * 4];
       data[startIndex + 3] = 255; // alpha
     }
   }
-  console.log(this.resizedImage.pixelArray.length);
-  console.log(this.resizedImage.imageData.data.length);
-  console.log(this.resizedImage.width);
-  console.log(this.resizedImage.height);
+  console.log('====== Before downsizing ======');
+  console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
+  console.log('imageData length: ' + this.resizedImage.imageData.data.length);
+  console.log('width: ' + this.resizedImage.width);
+  console.log('height: ' + this.resizedImage.height);
+  console.log('pixelArray: ');
+  printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
+  console.log('imageData: ');
+  printUint8(data, this.resizedImage.width, this.resizedImage.height);
   for (var i = 0; i < path.length; i++) {
     this.resizedImage.pixelArray.pop();
   }
   this.resizedImage.width--;
   this.resizedImage.imageData = new ImageData(data.slice(0, -adjustIndex * 4), this.resizedImage.width, this.resizedImage.height);
-  console.log(this.resizedImage.pixelArray.length);
-  console.log(this.resizedImage.imageData.data.length);
-  console.log(this.resizedImage.width);
-  console.log(this.resizedImage.height);
+  console.log('====== After downsizing ======');
+  console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
+  console.log('imageData length: ' + this.resizedImage.imageData.data.length);
+  console.log('width: ' + this.resizedImage.width);
+  console.log('height: ' + this.resizedImage.height);
+  console.log('pixelArray: ');
+  printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
+  console.log('imageData: ');
+  printUint8(data, this.resizedImage.width, this.resizedImage.height);
 };
 
 // the columns given by the path could be outside the picture. that's
@@ -246,3 +271,8 @@ Seamcarver.prototype.printPath = function(minPath) {
   }
   console.log("---------------------------------------------------------");
 }
+
+// Exceptions
+function NoPathFoundException() {
+  this.message = "No path was found";
+};

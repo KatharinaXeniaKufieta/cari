@@ -61,8 +61,21 @@ Pixel.prototype.toString = function() {
   return stringPixel;
 }
 
-Pixel.prototype.reset = function() {
+Pixel.prototype.reset = function(col, row) {
   this.marked = false;
   this.cost = null;
   this.prior = null;
+  this.col = col;
+  this.row = row;
+}
+
+Pixel.prototype.copy = function(pixel) {
+  this.col = pixel.col;
+  this.row = pixel.row;
+  this.color = pixel.color;
+  this.marked = pixel.marked;
+
+  this.energy = pixel.energy;
+  this.cost = pixel.cost;
+  this.prior = pixel.prior; // edge to pixel before this pixel on the search path
 }

@@ -55,7 +55,7 @@ Imagegraph.prototype.setPixelArray = function() {
 Imagegraph.prototype.resetPixelArray = function() {
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
-      this.pixelArray[this.getIndex(col, row)].reset();
+      this.pixelArray[this.getIndex(col, row)].reset(col, row);
     }
   }
 };
@@ -74,7 +74,8 @@ Imagegraph.prototype.copy = function(imagegraph) {
   this.pixelArray = [];
   this.imageData = new ImageData(imagegraph.imageData.data, this.width, this.height);
   for (var i = 0, max = imagegraph.pixelArray.length; i < max; i++) {
-    this.pixelArray[i] = imagegraph.pixelArray[i];
+    this.pixelArray[i] = new Pixel();
+    this.pixelArray[i].copy(imagegraph.pixelArray[i]);
   }
 };
 
@@ -184,10 +185,24 @@ Imagegraph.prototype.energyPicture = function() {
       data[startIndex + 3] = 255; // alpha
     }
   }
+
+  console.log('====== Energy Picture ======');
+  console.log('imageData length: ' + energyPicture.data.length);
+  console.log('width: ' + this.width);
+  console.log('height: ' + this.height);
+  console.log('imageData: ');
+  printUint8(energyPicture.data, this.width, this.height);
+
   return energyPicture;
 }
 
 Imagegraph.prototype.picture = function() {
+  console.log('====== Picture ======');
+  console.log('imageData length: ' + this.imageData.data.length);
+  console.log('width: ' + this.width);
+  console.log('height: ' + this.height);
+  console.log('imageData: ');
+  printUint8(this.imageData.data, this.width, this.height);
   var picture = new ImageData(this.imageData.data, this.width, this.height);
   return picture;
 }

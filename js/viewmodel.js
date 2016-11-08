@@ -73,7 +73,6 @@ ko.bindingHandlers.canvas = {
     // Next, whether or not the supplied model property is observable, get its
     // current value.
     var valueUnwrapped = ko.unwrap(value);
-    console.log('valueUnwrapped (imageLoaded): ' + valueUnwrapped);
 
     // Grab some more data from another binding property
     var width = allBindings().attr.width();
@@ -144,7 +143,6 @@ ViewModel.prototype.handleFile = function(file) {
 
 ViewModel.prototype.startResizing = function() {
   var self = this;
-  console.log('start resizing, number pixels width: ' + this.numberVerticalSeams());
 
   this.seamcarver.resizeWidth(this.numberVerticalSeams());
 
