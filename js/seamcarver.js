@@ -20,8 +20,8 @@ var Seamcarver = function(canvas) {
   // Create imagegraph from the image in the canvas
   this.originalImage = new Imagegraph();
   this.originalImage.constructFromCanvas(canvas);
-  console.log('the original imagedata')
-  printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
+  // console.log('the original imagedata')
+  // printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
   // Will be copied from originalImage every time resizeWidth is called
   this.resizedImage = new Imagegraph();
 
@@ -36,10 +36,9 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
 
   for (var seam = 0; seam < numberVerticalSeams; seam++) {
     var verticalMinPath = this.getVerticalMinPath();
-    console.log("verticalMinPath: " + verticalMinPath);
+    // console.log("verticalMinPath: " + verticalMinPath);
     // Array saving the seams
     this.seams.push(verticalMinPath);
-    console.log(this.seams);
     this.removeVerticalPath(verticalMinPath);
     this.recalculateVerticalEnergy(verticalMinPath);
     this.resizedImage.resetPixelArray();
@@ -105,7 +104,7 @@ Seamcarver.prototype.getVerticalMinPath = function() {
     minPath.unshift(minEndPixel.col);
     minEndPixel = minEndPixel.prior;
   }
-  this.printPath(minPath);
+  // this.printPath(minPath);
   if (minPath.length != this.resizedImage.height) {
     throw new NoPathFoundException();
   }
@@ -121,11 +120,11 @@ Seamcarver.prototype.removeVerticalPath = function(path) {
   if (path === undefined) {
     console.log('no path');
   }
-  console.log('pixelArray: ');
-  printPixelArray(this.resizedImage.pixelArray, width, height);
-  console.log('imageData: ');
+  // console.log('pixelArray: ');
+  // printPixelArray(this.resizedImage.pixelArray, width, height);
+  // console.log('imageData: ');
   var data = this.resizedImage.imageData.data;
-  printUint8(data, width, height);
+  // printUint8(data, width, height);
   var adjustIndex = 0;
   var index, startIndex, adjustedIndex, adjustedRow, adjustedCol;
   for (var row = 0; row < height; row++) {
@@ -147,29 +146,29 @@ Seamcarver.prototype.removeVerticalPath = function(path) {
       data[startIndex + 3] = 255; // alpha
     }
   }
-  console.log('====== Before downsizing ======');
-  console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
-  console.log('imageData length: ' + this.resizedImage.imageData.data.length);
-  console.log('width: ' + this.resizedImage.width);
-  console.log('height: ' + this.resizedImage.height);
-  console.log('pixelArray: ');
-  printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
-  console.log('imageData: ');
-  printUint8(data, this.resizedImage.width, this.resizedImage.height);
+  // console.log('====== Before downsizing ======');
+  // console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
+  // console.log('imageData length: ' + this.resizedImage.imageData.data.length);
+  // console.log('width: ' + this.resizedImage.width);
+  // console.log('height: ' + this.resizedImage.height);
+  // console.log('pixelArray: ');
+  // printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
+  // console.log('imageData: ');
+  // printUint8(data, this.resizedImage.width, this.resizedImage.height);
   for (var i = 0; i < path.length; i++) {
     this.resizedImage.pixelArray.pop();
   }
   this.resizedImage.width--;
   this.resizedImage.imageData = new ImageData(data.slice(0, -adjustIndex * 4), this.resizedImage.width, this.resizedImage.height);
-  console.log('====== After downsizing ======');
-  console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
-  console.log('imageData length: ' + this.resizedImage.imageData.data.length);
-  console.log('width: ' + this.resizedImage.width);
-  console.log('height: ' + this.resizedImage.height);
-  console.log('pixelArray: ');
-  printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
-  console.log('imageData: ');
-  printUint8(data, this.resizedImage.width, this.resizedImage.height);
+  // console.log('====== After downsizing ======');
+  // console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
+  // console.log('imageData length: ' + this.resizedImage.imageData.data.length);
+  // console.log('width: ' + this.resizedImage.width);
+  // console.log('height: ' + this.resizedImage.height);
+  // console.log('pixelArray: ');
+  // printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
+  // console.log('imageData: ');
+  // printUint8(data, this.resizedImage.width, this.resizedImage.height);
 };
 
 // the columns given by the path could be outside the picture. that's
@@ -217,11 +216,11 @@ Seamcarver.prototype.addSeamsToPicture = function(imagedata, width, height) {
 
 
 Seamcarver.prototype.pathPicture = function() {
-  console.log('pathPicture');
-  console.log(this.originalImage.imageData.data.length);
-  printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
-  console.log(this.originalImage.width);
-  console.log(this.originalImage.height);
+  // console.log('pathPicture');
+  // console.log(this.originalImage.imageData.data.length);
+  // printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
+  // console.log(this.originalImage.width);
+  // console.log(this.originalImage.height);
   return this.addSeamsToPicture(this.originalImage.imageData, this.originalImage.width, this.originalImage.height);
 };
 

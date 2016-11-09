@@ -187,23 +187,23 @@ Imagegraph.prototype.energyPicture = function() {
     }
   }
 
-  console.log('====== Energy Picture ======');
-  console.log('imageData length: ' + energyPicture.data.length);
-  console.log('width: ' + this.width);
-  console.log('height: ' + this.height);
-  console.log('imageData: ');
-  printUint8(energyPicture.data, this.width, this.height);
+  // console.log('====== Energy Picture ======');
+  // console.log('imageData length: ' + energyPicture.data.length);
+  // console.log('width: ' + this.width);
+  // console.log('height: ' + this.height);
+  // console.log('imageData: ');
+  // printUint8(energyPicture.data, this.width, this.height);
 
   return energyPicture;
 }
 
 Imagegraph.prototype.picture = function() {
-  console.log('====== Picture ======');
-  console.log('imageData length: ' + this.imageData.data.length);
-  console.log('width: ' + this.width);
-  console.log('height: ' + this.height);
-  console.log('imageData: ');
-  printUint8(this.imageData.data, this.width, this.height);
+  // console.log('====== Picture ======');
+  // console.log('imageData length: ' + this.imageData.data.length);
+  // console.log('width: ' + this.width);
+  // console.log('height: ' + this.height);
+  // console.log('imageData: ');
+  // printUint8(this.imageData.data, this.width, this.height);
   var picture = new ImageData(this.imageData.data, this.width, this.height);
   return picture;
 }
