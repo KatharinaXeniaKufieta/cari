@@ -20,6 +20,8 @@ var Seamcarver = function(canvas) {
   // Create imagegraph from the image in the canvas
   this.originalImage = new Imagegraph();
   this.originalImage.constructFromCanvas(canvas);
+  console.log('the original imagedata')
+  printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
   // Will be copied from originalImage every time resizeWidth is called
   this.resizedImage = new Imagegraph();
 
@@ -215,7 +217,9 @@ Seamcarver.prototype.addSeamsToPicture = function(imagedata, width, height) {
 
 
 Seamcarver.prototype.pathPicture = function() {
+  console.log('pathPicture');
   console.log(this.originalImage.imageData.data.length);
+  printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
   console.log(this.originalImage.width);
   console.log(this.originalImage.height);
   return this.addSeamsToPicture(this.originalImage.imageData, this.originalImage.width, this.originalImage.height);

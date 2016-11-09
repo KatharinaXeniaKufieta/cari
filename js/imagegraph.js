@@ -72,7 +72,8 @@ Imagegraph.prototype.copy = function(imagegraph) {
   this.height = imagegraph.height;
   // clear the pixelArray in case it was populated from before
   this.pixelArray = [];
-  this.imageData = new ImageData(imagegraph.imageData.data, this.width, this.height);
+  var dataCopy = new Uint8ClampedArray(imagegraph.imageData.data);
+  this.imageData = new ImageData(dataCopy, this.width, this.height);
   for (var i = 0, max = imagegraph.pixelArray.length; i < max; i++) {
     this.pixelArray[i] = new Pixel();
     this.pixelArray[i].copy(imagegraph.pixelArray[i]);

@@ -148,15 +148,19 @@ ViewModel.prototype.startResizing = function() {
 
   this.canvases().forEach(function(canvas) {
     if (canvas.id === 'resizedEnergy') {
+      canvas.imageLoaded(false);
       canvas.image = self.seamcarver.resizedEnergyPicture();
       canvas.imageLoaded(true);
     } else if (canvas.id === 'seams') {
+      canvas.imageLoaded(false);
       canvas.image = self.seamcarver.pathPicture();
       canvas.imageLoaded(true);
     } else if (canvas.id === 'energySeams') {
       canvas.image = self.seamcarver.energyPathPicture();
+      canvas.imageLoaded(false);
       canvas.imageLoaded(true);
     } else if (canvas.id === 'resized') {
+      canvas.imageLoaded(false);
       canvas.image = self.seamcarver.resizedPicture();
       canvas.imageLoaded(true);
     }
