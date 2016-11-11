@@ -37,6 +37,9 @@ Color.prototype.toString = function() {
  * @param {object} color - The color of the pixel.
  */
 var Pixel = function(col, row, color) {
+  this.originalCol = col;
+  this.originalRow = row;
+  this.deletedBySeamNumber = -1;
   this.col = col;
   this.row = row;
   this.color = color;
@@ -96,10 +99,22 @@ Pixel.prototype.reset = function(col, row) {
 }
 
 /**
+ * Reset the deletedBySeamNumber such that new seams can be calculated and saved.
+ * @param {number} col - The column of the new location of the Pixel.
+ * @param {number} row - The row of the new location of the Pixel.
+ */
+Pixel.prototype.resetSeams = function(col, row) {
+  this.deletedBySeamNumber = -1;
+}
+
+/**
  * Make a copy of another Pixel.
  * @param {object} pixel - Pixel that we're copying from.
  */
 Pixel.prototype.copy = function(pixel) {
+  this.originalCol = pixel.originalCol;
+  this.originalRow = pixel.originalRow;
+  this.deletedBySeamNumber = pixel.deletedBySeamNymber;
   this.col = pixel.col;
   this.row = pixel.row;
   this.color = pixel.color;

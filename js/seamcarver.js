@@ -41,8 +41,10 @@ var Seamcarver = function(canvas) {
  */
 Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
   this.seams = [];
+  this.originalImage.resetSeams();
   this.resizedImage = new Imagegraph();
   this.resizedImage.copy(this.originalImage);
+  // reset the seams in the original image before restarting a new calculation.
 
   if (numberVerticalSeams >= this.resizedImage.width) {
     console.log('can not delete more seams than the width of the image');
@@ -53,6 +55,7 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
     var verticalMinPath = this.getVerticalMinPath();
     // Array saving the seams
     this.seams.push(verticalMinPath);
+    this.saveSeams(verticalMinPath, seam);
     this.removeVerticalPath(verticalMinPath);
     this.recalculateVerticalEnergy(verticalMinPath);
     this.resizedImage.resetPixelArray();
@@ -124,6 +127,22 @@ Seamcarver.prototype.getVerticalMinPath = function() {
     throw new NoPathFoundException();
   }
   return minPath;
+};
+
+/**
+ * Save the seam to the original image for display.
+ * @param {array of numbers} path - Seam that will be deleted.
+ */
+Seamcarver.prototype.saveSeams = function(path, seamNumber) {
+  var col, resizedIndex, originalIndex, originalRow, originalCol;
+  for (var row = 0; row < path.length; row++) {
+    col = path[row];
+    resizedIndex = this.resizedImage.getIndex(col, row);
+    originalCol = this.resizedImage.pixelArray[resizedIndex].originalCol;
+    originalRow = this.resizedImage.pixelArray[resizedIndex].originalRow;
+    originalIndex = this.originalImage.getIndex(originalCol, originalRow);
+    this.originalImage.pixelArray[originalIndex].deletedBySeamNumber = seamNumber;
+  }
 };
 
 /**
@@ -201,16 +220,22 @@ Seamcarver.prototype.addSeamsToPicture = function(imagedata, width, height) {
   var dataCopy = new Uint8ClampedArray(imagedata.data);
   var pathPicture = new ImageData(dataCopy, width, height);
   var data = pathPicture.data;
+  var index;
+  if (width != this.originalImage.width || height != this.originalImage.height) {
+    throw new DimensionsNotEqualException();
+  }
   // add seams to picture, in red color
-  for (var i = 0, max = this.seams.length; i < max; i++) {
-    // add each path to data, make it red
-    for (var row = 0; row < height; row++) {
-      var col = this.seams[i][row];
-      var startIndex = row * width * 4 + col * 4;
-      data[startIndex] = 255;
-      data[startIndex + 1] = 0;
-      data[startIndex + 2] = 0;
-      data[startIndex + 3] = 255; // alpha
+  for (var row = 0; row < height; row++) {
+    for (var col = 0; col < width; col++) {
+      // add each path to data, make it red
+      index = this.originalImage.getIndex(col, row);
+      if (this.originalImage.pixelArray[index].deletedBySeamNumber != -1) {
+        var startIndex = row * width * 4 + col * 4;
+        data[startIndex] = 255;
+        data[startIndex + 1] = 0;
+        data[startIndex + 2] = 0;
+        data[startIndex + 3] = 255; // alpha
+      }
     }
   }
   return pathPicture;
@@ -296,4 +321,8 @@ Seamcarver.prototype.printPath = function(minPath) {
  **************/
 function NoPathFoundException() {
   this.message = "No path was found";
+};
+
+function DimensionsNotEqualException() {
+  this.message = "Dimensions of image for seams display must be equal";
 };

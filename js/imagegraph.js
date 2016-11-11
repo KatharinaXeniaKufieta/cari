@@ -69,6 +69,17 @@ Imagegraph.prototype.resetPixelArray = function() {
   }
 };
 
+/**
+ * Resets the seams in the Pixel array, so it can be used to save new seams.
+ */
+Imagegraph.prototype.resetSeams = function() {
+  for (var row = 0; row < this.height; row++) {
+    for (var col = 0; col < this.width; col++) {
+      this.pixelArray[this.getIndex(col, row)].resetSeams(col, row);
+    }
+  }
+};
+
 /***********************************************
  * Methods to construct Imagegraph from another
  * Imagegraph
