@@ -159,7 +159,8 @@ Seamcarver.prototype.removeVerticalPath = function(path) {
     this.resizedImage.pixelArray.pop();
   }
   this.resizedImage.width--;
-  this.resizedImage.imageData = new ImageData(data.slice(0, -adjustIndex * 4), this.resizedImage.width, this.resizedImage.height);
+  var dataCopy = new Uint8ClampedArray(data.slice(0, -adjustIndex * 4));
+  this.resizedImage.imageData = new ImageData(dataCopy, this.resizedImage.width, this.resizedImage.height);
   // console.log('====== After downsizing ======');
   // console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
   // console.log('imageData length: ' + this.resizedImage.imageData.data.length);
@@ -197,7 +198,8 @@ Seamcarver.prototype.recalculateVerticalEnergy = function(path) {
  * create picture where the seams are highlighted in red.
  */
 Seamcarver.prototype.addSeamsToPicture = function(imagedata, width, height) {
-  var pathPicture = new ImageData(imagedata.data, width, height);
+  var dataCopy = new Uint8ClampedArray(imagedata.data);
+  var pathPicture = new ImageData(dataCopy, width, height);
   var data = pathPicture.data;
   // add seams to picture, in red color
   for (var i = 0, max = this.seams.length; i < max; i++) {

@@ -158,7 +158,8 @@ Imagegraph.prototype.getEnergy = function(col, row) {
  * @returns {Uint8ClampedArray} Array holding the energies picture of the image.
  */
 Imagegraph.prototype.energyPicture = function() {
-  var energyPicture = new ImageData(this.imageData.data, this.width, this.height);
+  var dataCopy = new Uint8ClampedArray(this.imageData.data);
+  var energyPicture = new ImageData(dataCopy, this.width, this.height);
   var data = energyPicture.data;
   var maxVal = 0;
   var stringEnergy = "";
@@ -226,8 +227,8 @@ Imagegraph.prototype.picture = function() {
   // console.log('height: ' + this.height);
   // console.log('imageData: ');
   // printUint8(this.imageData.data, this.width, this.height);
-  // TODO: Make sure it is really a copy of the data by making a specific Uint8clampedarray copy!
-  var picture = new ImageData(this.imageData.data, this.width, this.height);
+  var dataCopy = new Uint8ClampedArray(this.imageData.data);
+  var picture = new ImageData(dataCopy, this.width, this.height);
   return picture;
 }
 
