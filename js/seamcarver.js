@@ -44,6 +44,11 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
   this.resizedImage = new Imagegraph();
   this.resizedImage.copy(this.originalImage);
 
+  if (numberVerticalSeams >= this.resizedImage.width) {
+    console.log('can not delete more seams than the width of the image');
+    numberVerticalSeams = this.resizedImage.width - 1;
+  }
+
   for (var seam = 0; seam < numberVerticalSeams; seam++) {
     var verticalMinPath = this.getVerticalMinPath();
     // Array saving the seams
