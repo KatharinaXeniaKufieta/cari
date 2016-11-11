@@ -271,9 +271,9 @@ Imagegraph.prototype.printPixelArray = function() {
   }
 };
 
-/************
- * Exceptions
- ***********/
+/**************
+ * Exceptions *
+ **************/
 function EmptyPixelArrayException() {
   this.message = "PixelArray is empty";
 };

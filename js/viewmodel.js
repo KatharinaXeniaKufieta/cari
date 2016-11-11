@@ -1,3 +1,9 @@
+/**
+ * Creates CanvasImage from the data saved in model.js. Handles a canvas
+ * in the display, including the displayed image, caption, context.
+ * @constructor
+ * @param {object} data - Data saved in model.js.
+ */
 var CanvasImage = function(data) {
   var self = this;
   // Knockout observables of an Image
@@ -15,9 +21,10 @@ var CanvasImage = function(data) {
 };
 
 
-// Scales the image accordingly to the maximum canvas size
-// so it will fit into the canvas and keep it's ratio between
-// width and height.
+/**
+ * Scales the uploaded image to fit the maximum size of the canvas. Keeps the
+ * ratio between width and height.
+ */
 CanvasImage.prototype.scaleImage = function() {
   var ratio = this.image.height / this.image.width;
   if (this.image.height > this.image.width &&
@@ -45,6 +52,10 @@ CanvasImage.prototype.scaleImage = function() {
   // this.canvasHeight(this.canvasHeight() + CANVAS_MARGIN);
 };
 
+/**
+ * Draws the image to the canvas. Handles both images that are an instance of
+ * Image or an instance of ImageData.
+ */
 CanvasImage.prototype.drawImage = function() {
   if (this.image instanceof Image) {
     console.log('draw Image');
@@ -57,6 +68,9 @@ CanvasImage.prototype.drawImage = function() {
   }
 };
 
+/**
+ * Clears the canvas.
+ */
 CanvasImage.prototype.clearCanvas = function() {
   this.context.fillStyle = 'rgb(235, 240, 255)';
   this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
@@ -65,6 +79,11 @@ CanvasImage.prototype.clearCanvas = function() {
 /*******************
  * Custom Bindings *
  *******************/
+/**
+ * Custom Binding for handling a canvas and its context. This allows us to loop
+ * over the data and create the canvases and their context dynamically with
+ * Knockout.
+ */
 ko.bindingHandlers.canvas = {
   update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
     // First get the latest data that we're bound to
@@ -93,6 +112,12 @@ ko.bindingHandlers.canvas = {
 /**************
  * ViewModel  *
  **************/
+/**
+ * ViewModel based on Knockout, connects the view and the data. Handles the
+ * uploading of the users image, their input for resizing the images, and
+ * the display of the various images on their canvases.
+ * @constructor
+ */
 var ViewModel = function() {
   var self = this;
   this.numberVerticalSeams = ko.observable(0);
@@ -102,7 +127,7 @@ var ViewModel = function() {
   this.energyPicture = {};
 
   this.canvases = ko.observableArray([]);
-  // imageData is the data saved in model.js
+  // imageData is the data saved in the file model.js
   imageData.forEach(function(data) {
     var canvas = new CanvasImage(data);
     canvas.imageLoaded = ko.observable(false);
@@ -110,8 +135,12 @@ var ViewModel = function() {
   });
 };
 
-// handleFile is called by an event listener when a change in the input
-// field for images is detected.
+/**
+ * handleFile is called by an event listener when a change in the input
+ * field for images is detected. Displays the uploaded image to the canvas and
+ * constructs a Seamcarver object.
+ * @param {object} file - File uploaded by the user.
+ */
 ViewModel.prototype.handleFile = function(file) {
   var self = this;
   // The FileReader object lets web applications asynchronously
@@ -141,6 +170,10 @@ ViewModel.prototype.handleFile = function(file) {
   reader.readAsDataURL(file);
 };
 
+/**
+ * Called when the Start Resizing button is clicked. Starts resizing the image
+ * with the provided number of seams that the user wants to delete.
+ */
 ViewModel.prototype.startResizing = function() {
   var self = this;
 
@@ -170,7 +203,6 @@ ViewModel.prototype.startResizing = function() {
 /******************
  * Apply Bindings *
  ******************/
-
 window.onload = function() {
   ko.applyBindings(new ViewModel());
 };

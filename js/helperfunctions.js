@@ -1,7 +1,18 @@
+/**
+ * Checks if an object is empty.
+ * @param {object} obj - Object that is checked if it's empty or not.
+ * @returns {boolean} True if object is empty, otherwise false.
+ */
 function isEmpty(obj){
   return (Object.getOwnPropertyNames(obj).length === 0);
 }
 
+/**
+ * Print the pixel array to the console.
+ * @param {array of objects} pixels - Array of Pixels.
+ * @param {number} width - Width of the image.
+ * @param {number} height - Height of the image.
+ */
 function printPixelArray(pixels, width, height) {
   var pString = '';
   for (var row = 0; row < height; row++) {
@@ -14,6 +25,12 @@ function printPixelArray(pixels, width, height) {
   }
 }
 
+/**
+ * Print the Uint8ClampedArray to the console.
+ * @param {Uint8ClampedArray} array - Array of Uint8 values.
+ * @param {number} width - Width of the image.
+ * @param {number} height - Height of the image.
+ */
 function printUint8(array, width, height) {
   var aString = '';
   for (var row = 0; row < height; row++) {

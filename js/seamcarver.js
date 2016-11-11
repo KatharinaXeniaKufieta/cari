@@ -16,12 +16,17 @@
  * Seamcarver class: Take data from uploaded picture,
  * create Imagegraph, run seamcarving on it
  *********************************************/
+/**
+ * The Seamcarver takes care of creating Imagegraphs, finding seams in the
+ * image, deleting seams and displaying the various images on the canvas.
+ * @constructor
+ * @param {object} canvas - The canvas where the image was uploaded and
+ * displayed from the user.
+ */
 var Seamcarver = function(canvas) {
   // Create imagegraph from the image in the canvas
   this.originalImage = new Imagegraph();
   this.originalImage.constructFromCanvas(canvas);
-  // console.log('the original imagedata')
-  // printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
   // Will be copied from originalImage every time resizeWidth is called
   this.resizedImage = new Imagegraph();
 
@@ -29,6 +34,11 @@ var Seamcarver = function(canvas) {
   this.seams = [];
 }
 
+/**
+ * Resizes the width of the uploaded image.
+ * @param {number} numberVerticalSeams - Number of vertical seams to be deleted,
+ * as defined by the user.
+ */
 Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
   this.seams = [];
   this.resizedImage = new Imagegraph();
@@ -36,7 +46,6 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
 
   for (var seam = 0; seam < numberVerticalSeams; seam++) {
     var verticalMinPath = this.getVerticalMinPath();
-    // console.log("verticalMinPath: " + verticalMinPath);
     // Array saving the seams
     this.seams.push(verticalMinPath);
     this.removeVerticalPath(verticalMinPath);
@@ -45,8 +54,9 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
   }
 }
 
-/*
- * Find vertical seam
+/**
+ * Calculates and returns the vertical seam.
+ * @returns {array of numbers} Seam with the smallest energy.
  */
 Seamcarver.prototype.getVerticalMinPath = function() {
   var newPixel = {};
@@ -111,8 +121,9 @@ Seamcarver.prototype.getVerticalMinPath = function() {
   return minPath;
 };
 
-/*
- * Remove the path from the minimized picture
+/**
+ * Remove the vertical path from the image.
+ * @param {array of numbers} path - Seam that will be deleted.
  */
 Seamcarver.prototype.removeVerticalPath = function(path) {
   var width = this.resizedImage.width;
@@ -120,11 +131,7 @@ Seamcarver.prototype.removeVerticalPath = function(path) {
   if (path === undefined) {
     console.log('no path');
   }
-  // console.log('pixelArray: ');
-  // printPixelArray(this.resizedImage.pixelArray, width, height);
-  // console.log('imageData: ');
   var data = this.resizedImage.imageData.data;
-  // printUint8(data, width, height);
   var adjustIndex = 0;
   var index, startIndex, adjustedIndex, adjustedRow, adjustedCol;
   for (var row = 0; row < height; row++) {
@@ -146,41 +153,25 @@ Seamcarver.prototype.removeVerticalPath = function(path) {
       data[startIndex + 3] = 255; // alpha
     }
   }
-  // console.log('====== Before downsizing ======');
-  // console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
-  // console.log('imageData length: ' + this.resizedImage.imageData.data.length);
-  // console.log('width: ' + this.resizedImage.width);
-  // console.log('height: ' + this.resizedImage.height);
-  // console.log('pixelArray: ');
-  // printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
-  // console.log('imageData: ');
-  // printUint8(data, this.resizedImage.width, this.resizedImage.height);
   for (var i = 0; i < path.length; i++) {
     this.resizedImage.pixelArray.pop();
   }
   this.resizedImage.width--;
   var dataCopy = new Uint8ClampedArray(data.slice(0, -adjustIndex * 4));
   this.resizedImage.imageData = new ImageData(dataCopy, this.resizedImage.width, this.resizedImage.height);
-  // console.log('====== After downsizing ======');
-  // console.log('pixelArray length: ' + this.resizedImage.pixelArray.length);
-  // console.log('imageData length: ' + this.resizedImage.imageData.data.length);
-  // console.log('width: ' + this.resizedImage.width);
-  // console.log('height: ' + this.resizedImage.height);
-  // console.log('pixelArray: ');
-  // printPixelArray(this.resizedImage.pixelArray, this.resizedImage.width, this.resizedImage.height);
-  // console.log('imageData: ');
-  // printUint8(data, this.resizedImage.width, this.resizedImage.height);
 };
 
-// the columns given by the path could be outside the picture. that's
-// because the energy is recalculated after the image has been resized,
-// and the seam could have been on the outer edge of the picture, which
-// would be out of bounds in the new, smaller version of the image.
+/**
+ * Recalculates the energy around the vertical seam that was deleted.
+ * @param {array of numbers} path - The seam that was deleted.
+ */
 Seamcarver.prototype.recalculateVerticalEnergy = function(path) {
   var col;
   for (var row = 0; row < this.resizedImage.height; row++) {
     col = path[row];
     // adjust the column to be within the bounds of the new, resized image.
+    // This could be the case, because the image was resized and the path could
+    // now be out of bounds.
     if (col >= this.resizedImage.width) {
       col = this.resizedImage.width - 1;
     }
@@ -194,8 +185,12 @@ Seamcarver.prototype.recalculateVerticalEnergy = function(path) {
   }
 };
 
-/*
- * create picture where the seams are highlighted in red.
+/**
+ * Take a picture and add the seams to it, highlighted in red.
+ * @param {object} imagedata - Imagedata of the image.
+ * @param {number} width - Width of the image.
+ * @param {number} height - Height of the image.
+ * @returns {object} Imagedata of the image including the seams.
  */
 Seamcarver.prototype.addSeamsToPicture = function(imagedata, width, height) {
   var dataCopy = new Uint8ClampedArray(imagedata.data);
@@ -217,24 +212,35 @@ Seamcarver.prototype.addSeamsToPicture = function(imagedata, width, height) {
 };
 
 
+/**
+ * Returns the original picture with all seams displayed in red.
+ * @returns {object} Imagedata of the original image with red seams.
+ */
 Seamcarver.prototype.pathPicture = function() {
-  // console.log('pathPicture');
-  // console.log(this.originalImage.imageData.data.length);
-  // printUint8(this.originalImage.imageData.data, this.originalImage.width, this.originalImage.height);
-  // console.log(this.originalImage.width);
-  // console.log(this.originalImage.height);
   return this.addSeamsToPicture(this.originalImage.imageData, this.originalImage.width, this.originalImage.height);
 };
 
+/**
+ * Returns the original energy picture with all seams displayed in red.
+ * @returns {object} Imagedata of the original energy picture with red seams.
+ */
 Seamcarver.prototype.energyPathPicture = function() {
   var energyPicture = this.originalImage.energyPicture();
   return this.addSeamsToPicture(energyPicture, this.originalImage.width, this.originalImage.height);
 };
 
+/**
+ * Returns the resized picture.
+ * @returns {object} Imagedata of the resized picture.
+ */
 Seamcarver.prototype.resizedPicture = function() {
   return this.resizedImage.picture();
 };
 
+/**
+ * Returns the resized energy picture.
+ * @returns {object} Imagedata of the resized energy picture.
+ */
 Seamcarver.prototype.resizedEnergyPicture = function() {
   return this.resizedImage.energyPicture();
 };
@@ -253,7 +259,10 @@ Seamcarver.prototype.calculateVerticalSeams = function() {
   // on which one is smaller, it will reach width / height of 1 faster)
 };
 
-// Print the path in the console
+/**
+ * Print the path in the console.
+ * @param {array of numbers} minPath - Calculated seam.
+ */
 Seamcarver.prototype.printPath = function(minPath) {
   console.log("-------------------- Vertical seam : --------------------");
   var stringPath = "Vertical seam : { ";
@@ -277,7 +286,9 @@ Seamcarver.prototype.printPath = function(minPath) {
   console.log("---------------------------------------------------------");
 }
 
-// Exceptions
+/**************
+ * Exceptions *
+ **************/
 function NoPathFoundException() {
   this.message = "No path was found";
 };
