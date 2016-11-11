@@ -2,6 +2,10 @@
  * Imagegraph class: Get data from uploaded picture,
  * create graph, run seamcarver on it
  *********************************************/
+/**
+ * Saves image information in form of Pixels and imagedata.
+ * @constructor
+ */
 var Imagegraph = function() {
   this.context = {};
   this.imageData = {};
@@ -13,6 +17,10 @@ var Imagegraph = function() {
 /***********************************************
  * Methods to construct Imagegraph from a canvas
  **********************************************/
+/**
+ * Constructor: construct Imagegraph from a canvas.
+ * @param {object} canvas - The canvas that holds the image that we'll read from.
+ */
 Imagegraph.prototype.constructFromCanvas = function(canvas) {
   this.context = canvas.context;
   this.imageData = this.context.getImageData(0, 0, canvas.canvasWidth(), canvas.canvasHeight());
@@ -27,13 +35,10 @@ Imagegraph.prototype.constructFromCanvas = function(canvas) {
   this.setPixelArray();
 };
 
-
-
-/*
- * Create pixel object for every pixel in picture, calculate
- * its energy and save it. All pixels are saved in the array
- * this.pixelArray and contains its energy, a pointer to the pixel
- * above it and the distance traveled when searching for
+/**
+ * Creates a Pixel object for every pixel in picture, calculate
+ * its energy and save it in an array. All pixels have an energy, a pointer to
+ * the pixel above it and the distance traveled when searching for
  * paths.
  */
 Imagegraph.prototype.setPixelArray = function() {
@@ -52,6 +57,10 @@ Imagegraph.prototype.setPixelArray = function() {
   // this.printPixelArray();
 };
 
+/**
+ * Resets the Pixel array, so it can be used for a new calculation of the next
+ * seam.
+ */
 Imagegraph.prototype.resetPixelArray = function() {
   for (var row = 0; row < this.height; row++) {
     for (var col = 0; col < this.width; col++) {
@@ -60,12 +69,14 @@ Imagegraph.prototype.resetPixelArray = function() {
   }
 };
 
-
 /***********************************************
  * Methods to construct Imagegraph from another
  * Imagegraph
  **********************************************/
-// copy the original pixels array into the resizedPixels array
+/**
+ * Constructor: Create this Imagegraph from another Imagegraph.
+ * @param {object} imagegraph - The imagegraph we're copying from.
+ */
 Imagegraph.prototype.copy = function(imagegraph) {
   // this.context = {};
   this.width = imagegraph.width;
@@ -83,9 +94,11 @@ Imagegraph.prototype.copy = function(imagegraph) {
 /******************
  * General Methods
  *****************/
-/*
- * Calculate the energy of the pixel at a specified column
- * and row.
+/**
+ * Calculate the energy of a Pixel at the given row & col. The energy of that
+ * Pixel is dependent on the color of the Pixels surrounding it.
+ * @param {number} col - The column where the pixel is located.
+ * @param {number} row - The row where the pixel is located.
  */
 Imagegraph.prototype.calculateEnergy = function(col, row) {
   if (this.pixelArray.length > 0) {
@@ -114,16 +127,21 @@ Imagegraph.prototype.calculateEnergy = function(col, row) {
   }
 };
 
-
-/*
- * Return the index for the given row and column.
+/**
+ * Return the index of a Pixel for the given row and column.
+ * @param {number} col - The column where the pixel is located.
+ * @param {number} row - The row where the pixel is located.
+ * @returns {number} Index of the Pixel in its array.
  */
 Imagegraph.prototype.getIndex = function(col, row) {
   return row * this.width + col;
 };
 
-/*
- * Return the energy of the pixel at the given row and column.
+/**
+ * Return the energy of the Pixel at the given row and column.
+ * @param {number} col - The column where the pixel is located.
+ * @param {number} row - The row where the pixel is located.
+ * @returns {number} Energy of the Pixel.
  */
 Imagegraph.prototype.getEnergy = function(col, row) {
   if (this.pixelArray.length > 0) {
@@ -133,11 +151,11 @@ Imagegraph.prototype.getEnergy = function(col, row) {
   }
 }
 
-
-/*
+/**
  * Create the energy picture by calculating the energy of each
  * each pixel from the original picture. It skips over the
  * creation of the pixel array which makes it faster.
+ * @returns {Uint8ClampedArray} Array holding the energies picture of the image.
  */
 Imagegraph.prototype.energyPicture = function() {
   var energyPicture = new ImageData(this.imageData.data, this.width, this.height);
@@ -197,6 +215,10 @@ Imagegraph.prototype.energyPicture = function() {
   return energyPicture;
 }
 
+/**
+ * create a copy of the imagedata and return the picture for further manipulation.
+ * @returns {uint8clampedarray} array holding the picture data of the image.
+ */
 Imagegraph.prototype.picture = function() {
   // console.log('====== Picture ======');
   // console.log('imageData length: ' + this.imageData.data.length);
@@ -204,12 +226,16 @@ Imagegraph.prototype.picture = function() {
   // console.log('height: ' + this.height);
   // console.log('imageData: ');
   // printUint8(this.imageData.data, this.width, this.height);
+  // TODO: Make sure it is really a copy of the data by making a specific Uint8clampedarray copy!
   var picture = new ImageData(this.imageData.data, this.width, this.height);
   return picture;
 }
 
-/*
+/**
  * Return the pixel at the specified column and row.
+ * @param {number} col - The column where the pixel is located.
+ * @param {number} row - The row where the pixel is located.
+ * @returns {object} Pixel at given row and column.
  */
 Imagegraph.prototype.getPixel = function(col, row) {
   var startIndex = row * this.width * 4 + col * 4;
@@ -220,7 +246,9 @@ Imagegraph.prototype.getPixel = function(col, row) {
   return new Pixel(col, row, new Color(red, green, blue, alpha));
 };
 
-// For debugging purposes: Print pixels of the image (RGB values)
+/**
+ * For debugging purposes: Print pixels of the image (RGB values)
+ */
 Imagegraph.prototype.printPixelArray = function() {
   if (this.pixelArray === undefined) {
     console.log('pixelArray is undefined ,can not print its values');
@@ -242,7 +270,9 @@ Imagegraph.prototype.printPixelArray = function() {
   }
 };
 
-// Exceptions
+/************
+ * Exceptions
+ ***********/
 function EmptyPixelArrayException() {
   this.message = "PixelArray is empty";
 };

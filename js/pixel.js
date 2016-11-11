@@ -26,7 +26,6 @@ Color.prototype.toString = function() {
   return stringColor;
 }
 
-
 /**********************************************
 * Custom Pixel Class
 *********************************************/
@@ -66,7 +65,8 @@ Pixel.prototype.setCost = function(cost) {
 
 /**
  * Set the edge to a Pixel, for backtracing a seam.
- * @param {object} pixel - Pixel that this pixel is pointing to, to remember the calculated seam.
+ * @param {object} pixel - Pixel that this pixel is pointing to, to remember the
+ * calculated seam.
  */
 Pixel.prototype.setEdgeTo = function(pixel) {
   this.prior = pixel;
