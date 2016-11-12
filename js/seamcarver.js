@@ -312,22 +312,6 @@ Seamcarver.prototype.removeHorizontalPath = function(path) {
       counter++;
     }
   }
-  // console.log('prior resize: this.resizedImage.pixelArray indeces');
-  // for (var k = 0; k < this.resizedImage.pixelArray.length; k++) {
-    // if (this.resizedImage.pixelArray[k] === undefined) {
-      // console.log('undefined');
-    // } else {
-      // console.log('[' + this.resizedImage.pixelArray[k].originalRow + ', ' + this.resizedImage.pixelArray[k].originalCol +   ']');
-    // }
-  // }
-  // console.log('prior resize: tempPixelArray indeces');
-  // for (var k = 0; k < tempPixelArray.length; k++) {
-    // if (tempPixelArray[k] === undefined) {
-      // console.log('undefined');
-    // } else {
-      // console.log('[' + tempPixelArray[k].originalRow + ', ' + tempPixelArray[k].originalCol +   ']');
-    // }
-  // }
   // delete the seams from the transposed arrays
   counter = 0;
   var adjustIndex = 0;
@@ -350,27 +334,11 @@ Seamcarver.prototype.removeHorizontalPath = function(path) {
       counter++;
     }
   }
-  // console.log('prior resize: tempPixelArray indeces');
-  // for (var k = 0; k < tempPixelArray.length; k++) {
-    // if (tempPixelArray[k] === undefined) {
-      // console.log('undefined');
-    // } else {
-      // console.log('[' + tempPixelArray[k].originalRow + ', ' + tempPixelArray[k].originalCol +   ']');
-    // }
-  // }
   // resize both original and temporary pixelArrays and image data
   for (var i = 0; i < path.length; i++) {
     tempPixelArray.pop();
     this.resizedImage.pixelArray.pop();
   }
-  // console.log('after resize: this.resizedImage.pixelArray indeces');
-  // for (var k = 0; k < this.resizedImage.pixelArray.length; k++) {
-    // if (this.resizedImage.pixelArray[k] === undefined) {
-      // console.log('undefined');
-    // } else {
-      // console.log('[' + this.resizedImage.pixelArray[k].originalRow + ', ' + this.resizedImage.pixelArray[k].originalCol +   ']');
-    // }
-  // }
   this.resizedImage.height--;
   var dataCopy = new Uint8ClampedArray(tempData.slice(0, -adjustIndex * 4));
   // Transpose the pixelArray and the data back.
@@ -390,14 +358,6 @@ Seamcarver.prototype.removeHorizontalPath = function(path) {
       counter++;
     }
   }
-  // console.log('after resize & reshuffle: this.resizedImage.pixelArray indeces');
-  // for (var k = 0; k < this.resizedImage.pixelArray.length; k++) {
-    // if (this.resizedImage.pixelArray[k] === undefined) {
-      // console.log('undefined');
-    // } else {
-      // console.log('[' + this.resizedImage.pixelArray[k].originalRow + ', ' + this.resizedImage.pixelArray[k].originalCol +   ']');
-    // }
-  // }
   // make sure you're definitely making copies by value
   var redundantDataCopy = new Uint8ClampedArray(dataCopy);
   this.resizedImage.imageData = new ImageData(redundantDataCopy, this.resizedImage.width, this.resizedImage.height);
