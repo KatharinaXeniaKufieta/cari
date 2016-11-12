@@ -29,18 +29,17 @@ var Seamcarver = function(canvas) {
   this.originalImage.constructFromCanvas(canvas);
   // Will be copied from originalImage every time resizeWidth is called
   this.resizedImage = new Imagegraph();
-
-  // Array saving the seams
-  this.seams = [];
 }
 
 /**
  * Resizes the width of the uploaded image.
  * @param {number} numberVerticalSeams - Number of vertical seams to be deleted,
  * as defined by the user.
+ * @param {number} numberHorizontalSeams - Number of horizontal seams to be
+ * deleted, as defined by the user.
  */
-Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
-  this.seams = [];
+Seamcarver.prototype.resizeWidth = function(numberVerticalSeams, numberHorizontalSeams) {
+  // prepare images before calculating seams
   this.originalImage.resetSeams();
   this.resizedImage = new Imagegraph();
   this.resizedImage.copy(this.originalImage);
@@ -50,15 +49,29 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams) {
     console.log('can not delete more seams than the width of the image');
     numberVerticalSeams = this.resizedImage.width - 1;
   }
+  if (numberHorizontalSeams >= this.resizedImage.height) {
+    console.log('can not delete more seams than the height of the image');
+    numberHorizontalSeams = this.resizedImage.height - 1;
+  }
 
-  for (var seam = 0; seam < numberVerticalSeams; seam++) {
-    var verticalMinPath = this.getVerticalMinPath();
-    // Array saving the seams
-    this.seams.push(verticalMinPath);
-    this.saveSeams(verticalMinPath, seam);
-    this.removeVerticalPath(verticalMinPath);
-    this.recalculateVerticalEnergy(verticalMinPath);
-    this.resizedImage.resetPixelArray();
+  // Delete diagonally first
+  var diagonal = Math.min(numberVerticalSeams, numberHorizontalSeams);
+  var seam = 0;
+  for (; seam < diagonal; seam++) {
+    this.calculateHorizontalSeam(seam);
+    this.calculateVerticalSeam(seam);
+  }
+
+  // Delete the rest: delete vertical if there are more vertical seams to be
+  // deleted
+  for (; seam < numberVerticalSeams - diagonal; seam++) {
+    this.calculateVerticalSeam(seam);
+  }
+
+  // Delete the rest: delete horizontal if there are more horizontal seams to be
+  // deleted
+  for (; seam < numberHorizontalSeams - diagonal; seam++) {
+    this.calculateHorizontalSeam(seam);
   }
 }
 
@@ -81,10 +94,10 @@ Seamcarver.prototype.getVerticalMinPath = function() {
   minPath = new Array();
 
   // Add the top row of pixels to the queue
-  for (var i = 0; i < this.resizedImage.width; i++) {
-    queue.unshift(this.resizedImage.pixelArray[i]);
-    this.resizedImage.pixelArray[i].marked = true;
-    this.resizedImage.pixelArray[i].cost = this.resizedImage.pixelArray[i].energy;
+  for (var col = 0; col < this.resizedImage.width; col++) {
+    queue.unshift(this.resizedImage.pixelArray[col]);
+    this.resizedImage.pixelArray[col].marked = true;
+    this.resizedImage.pixelArray[col].cost = this.resizedImage.pixelArray[col].energy;
   }
   while (queue[0] != null) {
     currentPixel = queue.pop();
@@ -130,13 +143,98 @@ Seamcarver.prototype.getVerticalMinPath = function() {
 };
 
 /**
- * Save the seam to the original image for display.
- * @param {array of numbers} path - Seam that will be deleted.
+ * Calculates and returns the horizontal seam.
+ * @returns {array of numbers} Seam with the smallest energy.
  */
-Seamcarver.prototype.saveSeams = function(path, seamNumber) {
+Seamcarver.prototype.getHorizontalMinPath = function() {
+  var newPixel = {};
+  // queue of pixels that need to be processed to find the
+  // shortest path
+  var queue = new Array();
+  var currentPixel = {};
+  // minimum Distance that will help to find the shortest
+  // path
+  var minDist = Number.POSITIVE_INFINITY;
+  // hold on to the last pixel that belongs to the minimum path
+  var minEndPixel = -1;
+  // Array of indices of the minimum path
+  minPath = new Array();
+
+  // Add the left column of pixels to the queue
+  for (var row = 0; row < this.resizedImage.height; row++) {
+    var col = 0;
+    var index = this.resizedImage.getIndex(col, row);
+    queue.unshift(this.resizedImage.pixelArray[index]);
+    this.resizedImage.pixelArray[index].marked = true;
+    this.resizedImage.pixelArray[index].cost = this.resizedImage.pixelArray[index].energy;
+  }
+  while (queue[0] != null) {
+    currentPixel = queue.pop();
+    if (currentPixel.col < this.resizedImage.width - 1) {
+      var col = currentPixel.col + 1;
+      for (var row = currentPixel.row - 1; row <= currentPixel.row + 1; row++) {
+        if (row >= 0 && row < this.resizedImage.height) {
+          newPixel = this.resizedImage.pixelArray[this.resizedImage.getIndex(col, row)];
+          if (!newPixel.marked) {
+            newPixel.cost = currentPixel.cost + newPixel.energy;
+            newPixel.prior = currentPixel;
+            newPixel.marked = true;
+            queue.unshift(newPixel);
+          } else if (newPixel.cost > currentPixel.cost + newPixel.energy) {
+            var index = queue.indexOf(newPixel);
+            newPixel.cost = currentPixel.cost + newPixel.energy;
+            newPixel.prior = currentPixel;
+            queue[index] = newPixel;
+          } else {
+            // "Pixel is already in queue and the new cost is not lower");
+          }
+        }
+      }
+    } else {
+      if (currentPixel.cost < minDist) {
+        minDist = currentPixel.cost;
+        minEndPixel = currentPixel;
+      }
+    }
+  }
+  console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
+  var counter = 0;
+  while (minEndPixel != null) {
+    counter++;
+    minPath.unshift(minEndPixel.row);
+    minEndPixel = minEndPixel.prior;
+  }
+  // this.printPath(minPath);
+  if (minPath.length != this.resizedImage.width) {
+    throw new NoPathFoundException();
+  }
+  return minPath;
+};
+
+/**
+ * Save the vertical seam to the original image for display.
+ * @param {array of numbers} path - Vertical seam that will be deleted.
+ */
+Seamcarver.prototype.saveVerticalSeam = function(path, seamNumber) {
   var col, resizedIndex, originalIndex, originalRow, originalCol;
   for (var row = 0; row < path.length; row++) {
     col = path[row];
+    resizedIndex = this.resizedImage.getIndex(col, row);
+    originalCol = this.resizedImage.pixelArray[resizedIndex].originalCol;
+    originalRow = this.resizedImage.pixelArray[resizedIndex].originalRow;
+    originalIndex = this.originalImage.getIndex(originalCol, originalRow);
+    this.originalImage.pixelArray[originalIndex].deletedBySeamNumber = seamNumber;
+  }
+};
+
+/**
+ * Save the horizontal seam to the original image for display.
+ * @param {array of numbers} path - Horizontal seam that will be deleted.
+ */
+Seamcarver.prototype.saveHorizontalSeam = function(path, seamNumber) {
+  var row, resizedIndex, originalIndex, originalRow, originalCol;
+  for (var col = 0; col < path.length; col++) {
+    row = path[col];
     resizedIndex = this.resizedImage.getIndex(col, row);
     originalCol = this.resizedImage.pixelArray[resizedIndex].originalCol;
     originalRow = this.resizedImage.pixelArray[resizedIndex].originalRow;
@@ -186,6 +284,126 @@ Seamcarver.prototype.removeVerticalPath = function(path) {
 };
 
 /**
+ * Remove the horizontal path from the image.
+ * @param {array of numbers} path - Seam that will be deleted.
+ */
+Seamcarver.prototype.removeHorizontalPath = function(path) {
+  var width = this.resizedImage.width;
+  var height = this.resizedImage.height;
+  if (path === undefined) {
+    console.log('no path');
+  }
+  var data = this.resizedImage.imageData.data;
+  var tempData = new Uint8ClampedArray(data);
+  var tempPixelArray = this.resizedImage.copyPixelArray();
+  // Transpose the pixelArray and the data, and save them in temporary
+  // variables tempData and tempPixelArray.
+  var index, startIndex, counter = 0, dataCounter = 0;
+  for (var col = 0; col < width; col++) {
+    for (var row = 0; row < height; row++) {
+      index = this.resizedImage.getIndex(col, row);
+      tempPixelArray[counter] = this.resizedImage.pixelArray[index];
+      dataCounter = counter * 4;
+      startIndex = row * width * 4 + col * 4;
+      tempData[dataCounter] = data[startIndex];
+      tempData[dataCounter + 1] = data[startIndex + 1];
+      tempData[dataCounter + 2] = data[startIndex + 2];
+      tempData[dataCounter + 3] = 255; // alpha
+      counter++;
+    }
+  }
+  // console.log('prior resize: this.resizedImage.pixelArray indeces');
+  // for (var k = 0; k < this.resizedImage.pixelArray.length; k++) {
+    // if (this.resizedImage.pixelArray[k] === undefined) {
+      // console.log('undefined');
+    // } else {
+      // console.log('[' + this.resizedImage.pixelArray[k].originalRow + ', ' + this.resizedImage.pixelArray[k].originalCol +   ']');
+    // }
+  // }
+  // console.log('prior resize: tempPixelArray indeces');
+  // for (var k = 0; k < tempPixelArray.length; k++) {
+    // if (tempPixelArray[k] === undefined) {
+      // console.log('undefined');
+    // } else {
+      // console.log('[' + tempPixelArray[k].originalRow + ', ' + tempPixelArray[k].originalCol +   ']');
+    // }
+  // }
+  // delete the seams from the transposed arrays
+  counter = 0;
+  var adjustIndex = 0;
+  var adjustedIndex, adjustedRow, adjustedCol;
+  for (var i = 0; i < height; i++) {
+    for (var j = 0; j < width; j++) {
+      adjustedIndex = counter + adjustIndex;
+      adjustedRow = Math.floor(adjustedIndex / height);
+      adjustedCol = adjustedIndex % height;
+      // Columns and rows are flipped now, because we transposed the array.
+      if (path[adjustedRow] === adjustedCol) {
+        adjustIndex++;
+      }
+      tempPixelArray[counter] = tempPixelArray[counter + adjustIndex];
+      startIndex = counter * 4;
+      tempData[startIndex] = tempData[startIndex + adjustIndex * 4];
+      tempData[startIndex + 1] = tempData[startIndex + 1 + adjustIndex * 4];
+      tempData[startIndex + 2] = tempData[startIndex + 2 + adjustIndex * 4];
+      tempData[startIndex + 3] = 255; // alpha
+      counter++;
+    }
+  }
+  // console.log('prior resize: tempPixelArray indeces');
+  // for (var k = 0; k < tempPixelArray.length; k++) {
+    // if (tempPixelArray[k] === undefined) {
+      // console.log('undefined');
+    // } else {
+      // console.log('[' + tempPixelArray[k].originalRow + ', ' + tempPixelArray[k].originalCol +   ']');
+    // }
+  // }
+  // resize both original and temporary pixelArrays and image data
+  for (var i = 0; i < path.length; i++) {
+    tempPixelArray.pop();
+    this.resizedImage.pixelArray.pop();
+  }
+  // console.log('after resize: this.resizedImage.pixelArray indeces');
+  // for (var k = 0; k < this.resizedImage.pixelArray.length; k++) {
+    // if (this.resizedImage.pixelArray[k] === undefined) {
+      // console.log('undefined');
+    // } else {
+      // console.log('[' + this.resizedImage.pixelArray[k].originalRow + ', ' + this.resizedImage.pixelArray[k].originalCol +   ']');
+    // }
+  // }
+  this.resizedImage.height--;
+  var dataCopy = new Uint8ClampedArray(tempData.slice(0, -adjustIndex * 4));
+  // Transpose the pixelArray and the data back.
+  counter = 0;
+  dataCounter = 0;
+  height = this.resizedImage.height;
+  for (var col = 0; col < width; col++) {
+    for (var row = 0; row < height; row++) {
+      index = this.resizedImage.getIndex(col, row);
+      this.resizedImage.pixelArray[index] = tempPixelArray[counter];
+      dataCounter = counter * 4;
+      startIndex = row * width * 4 + col * 4;
+      dataCopy[startIndex] = tempData[dataCounter];
+      dataCopy[startIndex + 1] = tempData[dataCounter + 1];
+      dataCopy[startIndex + 2] = tempData[dataCounter + 2];
+      dataCopy[startIndex + 3] = 255; // alpha
+      counter++;
+    }
+  }
+  // console.log('after resize & reshuffle: this.resizedImage.pixelArray indeces');
+  // for (var k = 0; k < this.resizedImage.pixelArray.length; k++) {
+    // if (this.resizedImage.pixelArray[k] === undefined) {
+      // console.log('undefined');
+    // } else {
+      // console.log('[' + this.resizedImage.pixelArray[k].originalRow + ', ' + this.resizedImage.pixelArray[k].originalCol +   ']');
+    // }
+  // }
+  // make sure you're definitely making copies by value
+  var redundantDataCopy = new Uint8ClampedArray(dataCopy);
+  this.resizedImage.imageData = new ImageData(redundantDataCopy, this.resizedImage.width, this.resizedImage.height);
+};
+
+/**
  * Recalculates the energy around the vertical seam that was deleted.
  * @param {array of numbers} path - The seam that was deleted.
  */
@@ -204,6 +422,30 @@ Seamcarver.prototype.recalculateVerticalEnergy = function(path) {
     }
     if (col < this.resizedImage.width - 1) {
       this.resizedImage.calculateEnergy(col + 1, row);
+    }
+    this.resizedImage.calculateEnergy(col, row);
+  }
+};
+
+/**
+ * Recalculates the energy around the horizontal seam that was deleted.
+ * @param {array of numbers} path - The seam that was deleted.
+ */
+Seamcarver.prototype.recalculateHorizontalEnergy = function(path) {
+  var row;
+  for (var col = 0; col < this.resizedImage.width; col++) {
+    row = path[col];
+    // adjust the column to be within the bounds of the new, resized image.
+    // This could be the case, because the image was resized and the path could
+    // now be out of bounds.
+    if (row >= this.resizedImage.height) {
+      row = this.resizedImage.height - 1;
+    }
+    if (row > 0) {
+      this.resizedImage.calculateEnergy(col, row - 1);
+    }
+    if (row < this.resizedImage.height - 1) {
+      this.resizedImage.calculateEnergy(col, row + 1);
     }
     this.resizedImage.calculateEnergy(col, row);
   }
@@ -275,18 +517,32 @@ Seamcarver.prototype.resizedEnergyPicture = function() {
   return this.resizedImage.energyPicture();
 };
 
-Seamcarver.prototype.calculateVerticalSeams = function() {
-  // precalculate vertical seams from max width to width 1 of image
+/**
+ * Calculate the next vertical seam.
+ * @param {numbers} seamNumber - Number of the seam that is currently calculated.
+ * @returns {array of numbers} Vertical seam.
+ */
+Seamcarver.prototype.calculateVerticalSeam = function(seamNumber) {
+  var verticalMinPath = this.getVerticalMinPath();
+  this.saveVerticalSeam(verticalMinPath, seamNumber);
+  this.removeVerticalPath(verticalMinPath);
+  this.recalculateVerticalEnergy(verticalMinPath);
+  this.resizedImage.resetPixelArray();
+  return verticalMinPath;
 };
 
-Seamcarver.prototype.calculateHorizontalSeams = function() {
-  // precalculate horizontal seams from max width to width 1 of image
-};
-
-Seamcarver.prototype.calculateVerticalSeams = function() {
-  // precalculate vertical seams (change between horizontal & vertical)
-  // from width & height 1 to either width or height 1 (depending
-  // on which one is smaller, it will reach width / height of 1 faster)
+/**
+ * Calculate the next horizontal seam.
+ * @param {numbers} seamNumber - Number of the seam that is currently calculated.
+ * @returns {array of numbers} Horizontal seam.
+ */
+Seamcarver.prototype.calculateHorizontalSeam = function(seamNumber) {
+  var horizontalMinPath = this.getHorizontalMinPath();
+  this.saveHorizontalSeam(horizontalMinPath, seamNumber);
+  this.removeHorizontalPath(horizontalMinPath);
+  this.recalculateHorizontalEnergy(horizontalMinPath);
+  this.resizedImage.resetPixelArray();
+  return horizontalMinPath;
 };
 
 /**

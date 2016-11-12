@@ -102,6 +102,19 @@ Imagegraph.prototype.copy = function(imagegraph) {
   }
 };
 
+/**
+ * Copy and return a pixelarray.
+ * @returns {object} Copy of the pixelArray.
+ */
+Imagegraph.prototype.copyPixelArray = function() {
+  var newPixelArray = [];
+  for (var i = 0, max = this.pixelArray.length; i < max; i++) {
+    newPixelArray[i] = new Pixel();
+    newPixelArray[i].copy(this.pixelArray[i]);
+  }
+  return newPixelArray;
+}
+
 /******************
  * General Methods
  *****************/

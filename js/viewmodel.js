@@ -121,6 +121,7 @@ ko.bindingHandlers.canvas = {
 var ViewModel = function() {
   var self = this;
   this.numberVerticalSeams = ko.observable(0);
+  this.numberHorizontalSeams = ko.observable(0);
 
   // Variables that are going to be set by the custom binding
   this.seamcarver = {};
@@ -177,7 +178,7 @@ ViewModel.prototype.handleFile = function(file) {
 ViewModel.prototype.startResizing = function() {
   var self = this;
 
-  this.seamcarver.resizeWidth(this.numberVerticalSeams());
+  this.seamcarver.resizeWidth(this.numberVerticalSeams(), this.numberHorizontalSeams());
 
   this.canvases().forEach(function(canvas) {
     if (canvas.id === 'resizedEnergy') {
