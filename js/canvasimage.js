@@ -56,7 +56,7 @@ CanvasImage.prototype.drawImage = function() {
     this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
     this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
   } else if (this.image instanceof ImageData) {
-    console.log('draw ImageData');
+    // console.log('draw ImageData');
     this.context.putImageData(this.image, 0, 0);
   }
 };
@@ -67,24 +67,6 @@ CanvasImage.prototype.drawImage = function() {
 CanvasImage.prototype.clearCanvas = function() {
   this.context.fillStyle = 'rgb(235, 240, 255)';
   this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
-};
-
-CanvasImage.prototype.enablePulling = function(data, evt) {
-  console.log('canvasImage enablePulling');
-  this.resize = false;
-  // do nothing
-};
-
-CanvasImage.prototype.getResize = function(data, evt) {
-  console.log('canvasImage getResize');
-  this.resize = false;
-  // do nothing
-};
-
-CanvasImage.prototype.resizeImage = function(data, evt) {
-  console.log('canvasImage resizeImage');
-  this.resize = false;
-  // do nothing
 };
 
 /**********************
@@ -152,8 +134,8 @@ ResizeImage.prototype.scaleImage = function() {
   this.originalHeight = this.bottomRightY - this.topLeftY;
   this.canvasWidth(this.canvasWidth() + 2 * CANVAS_MARGIN);
   this.canvasHeight(this.canvasHeight() + 2 * CANVAS_MARGIN);
-  console.log('topLeft (x,y): (' + this.topLeftX + ', ' + this.topLeftY + ')');
-  console.log('bottomRight (x,y): (' + this.bottomRightX + ', ' + this.bottomRightY + ')');
+  // console.log('topLeft (x,y): (' + this.topLeftX + ', ' + this.topLeftY + ')');
+  // console.log('bottomRight (x,y): (' + this.bottomRightX + ', ' + this.bottomRightY + ')');
 };
 
 /**
@@ -166,7 +148,7 @@ ResizeImage.prototype.drawImage = function() {
     this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
     this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
   } else if (this.image instanceof ImageData) {
-    console.log('draw ImageData');
+    // console.log('draw ImageData');
     this.context.putImageData(this.image, 0, 0);
   }
 };
@@ -188,19 +170,19 @@ ResizeImage.prototype.clearCanvas = function() {
  * @param {object} evt - Event, here: mousemove.
  */
 ResizeImage.prototype.enablePulling = function(data, evt) {
-  console.log('resizeImage enablePulling');
+  // console.log('resizeImage enablePulling');
   var canvasOffsetTop = this.canvas.offsetTop;
   var canvasOffsetLeft = this.canvas.offsetLeft;
-  console.log('canvasOffsetTop: ' + canvasOffsetTop);
-  console.log('canvasOffsetLeft: ' + canvasOffsetLeft);
+  // console.log('canvasOffsetTop: ' + canvasOffsetTop);
+  // console.log('canvasOffsetLeft: ' + canvasOffsetLeft);
 
   // relativeMouse is the relative position of the mouse within the canvas.
   var relativeMouseX = evt.pageX - canvasOffsetLeft;
   var relativeMouseY = evt.pageY - canvasOffsetTop;
-  console.log('evt.pageX: ' + evt.pageX);
-  console.log('evt.pageY: ' + evt.pageY);
-  console.log('relativeMouseX: ' + relativeMouseX);
-  console.log('relativeMouseY: ' + relativeMouseY);
+  // console.log('evt.pageX: ' + evt.pageX);
+  // console.log('evt.pageY: ' + evt.pageY);
+  // console.log('relativeMouseX: ' + relativeMouseX);
+  // console.log('relativeMouseY: ' + relativeMouseY);
   if (!this.resizing && relativeMouseX > this.topLeftX && relativeMouseY > this.topLeftY && relativeMouseX < this.bottomRightX && relativeMouseY < this.bottomRightY) {
     if (relativeMouseX - this.topLeftX < 20 && relativeMouseY - this.topLeftY < 20) {
       console.log('Upper left corner');
@@ -240,7 +222,7 @@ ResizeImage.prototype.enablePulling = function(data, evt) {
  * @param {object} evt - Event, here: mousedown.
  */
 ResizeImage.prototype.getResize = function(data, evt) {
-  console.log('resizeImage getResize');
+  // console.log('resizeImage getResize');
   this.resizing = true;
   this.mouseDownX = evt.pageX;
   this.mouseDownY = evt.pageY;
@@ -290,7 +272,7 @@ ResizeImage.prototype.getResize = function(data, evt) {
  * @param {object} evt - Event, here: mouseup.
  */
 ResizeImage.prototype.resizeImage = function(data, evt) {
-  console.log('resizeImage resizeImage');
+  // console.log('resizeImage resizeImage');
   this.mouseUpX = evt.pageX;
   this.mouseUpY = evt.pageY;
   var upper = false;
@@ -356,4 +338,46 @@ ResizeImage.prototype.resizeImage = function(data, evt) {
   this.numVerticalSeams(this.originalWidth - newWidth);
   this.numHorizontalSeams(this.originalHeight - newHeight);
   this.resizing = false;
+};
+
+
+/**
+ * Event handler that records the position of the mouse when the user let go of
+ * the mousebutton. This position is used to calculate how much the image has to
+ * be resized.
+ * @param {object} data - Data from the event.
+ * @param {object} evt - Event, here: mouseup.
+ */
+ResizeImage.prototype.manualAdjustImage = function(flag, numVerticalSeams, numHorizontalSeams) {
+  if (flag !== 'width' && flag !== 'height') {
+    console.log(flag);
+    throw new WrongFlagException();
+  }
+  var currentWidth = this.bottomRightX - this.topLeftX;
+  var currentHeight = this.bottomRightY - this.topLeftY;
+  if ((flag === 'width' && currentWidth !== this.originalWidth - numVerticalSeams) ||
+      (flag === 'height' && currentHeight !== this.originalHeight - numHorizontalSeams)) {
+    console.log('currentHeight: ' + currentHeight);
+    console.log('currentWidth: ' + currentWidth);
+    console.log(this.originalHeight - numHorizontalSeams);
+    console.log(this.originalWidth - numVerticalSeams);
+    this.topLeftX = CANVAS_MARGIN;
+    this.topLeftY = CANVAS_MARGIN;
+    this.bottomRightX = this.originalWidth - numVerticalSeams + CANVAS_MARGIN;
+    this.bottomRightY = this.originalHeight - numHorizontalSeams + CANVAS_MARGIN;
+    this.context.fillStyle = 'rgb(207, 214, 217)';
+    this.context.fillRect(CANVAS_MARGIN, CANVAS_MARGIN, this.canvasWidth() - CANVAS_MARGIN * 2 + 1, this.canvasHeight() - CANVAS_MARGIN * 2 + 1);
+    var newWidth = this.bottomRightX - this.topLeftX;
+    var newHeight = this.bottomRightY - this.topLeftY;
+    this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, this.topLeftX, this.topLeftY, newWidth, newHeight);
+  } else {
+    console.log('unnecessary to change image size because this was not a manual resize');
+  }
+};
+
+/**************
+  * Exceptions *
+  **************/
+function WrongFlagException() {
+  this.message = "Flag is neither width nor height";
 };

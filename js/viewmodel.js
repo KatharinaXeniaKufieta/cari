@@ -46,6 +46,7 @@ var ViewModel = function() {
   this.numberVerticalSeams = ko.observable(0);
   this.numberHorizontalSeams = ko.observable(0);
 
+
   // Variables that are going to be set by the custom binding
   this.seamcarver = {};
   this.energyPicture = {};
@@ -65,7 +66,26 @@ var ViewModel = function() {
       self.canvases.push(canvas);
     }
   });
+
+  this.numberVerticalSeams.subscribe(function(oldValue) {
+    console.log("Vertical seams old value: " + oldValue);
+  }, null, "beforeChange");
+
+  this.numberHorizontalSeams.subscribe(function(oldValue) {
+    console.log("Horizontal seams old value: " + oldValue);
+  }, null, "beforeChange");
+
+  this.numberVerticalSeams.subscribe(function(newValue) {
+    console.log("Vertical seams new value: " + newValue);
+    self.resizeCanvases()[0].manualAdjustImage('width', self.numberVerticalSeams(), self.numberHorizontalSeams());
+  });
+
+  this.numberHorizontalSeams.subscribe(function(newValue) {
+    console.log("Horizontal seams new value: " + newValue);
+    self.resizeCanvases()[0].manualAdjustImage('height', self.numberVerticalSeams(), self.numberHorizontalSeams());
+  });
 };
+
 
 /**
  * handleFile is called by an event listener when a change in the input
