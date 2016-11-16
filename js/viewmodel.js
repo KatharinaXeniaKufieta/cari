@@ -1,81 +1,3 @@
-/**
- * Creates CanvasImage from the data saved in model.js. Handles a canvas
- * in the display, including the displayed image, caption, context.
- * @constructor
- * @param {object} data - Data saved in model.js.
- */
-var CanvasImage = function(data) {
-  var self = this;
-  // Knockout observables of an Image
-  this.caption = ko.observable(data.caption);
-  this.canvasWidth = ko.observable(30);
-  this.canvasHeight = ko.observable(30);
-
-  // Regular variables of an Image
-  this.id = data.id;
-  this.image = new Image();
-
-  // Variables that are going to be set by the custom binding
-  this.canvas = {};
-  this.context = {};
-};
-
-
-/**
- * Scales the uploaded image to fit the maximum size of the canvas. Keeps the
- * ratio between width and height.
- */
-CanvasImage.prototype.scaleImage = function() {
-  var ratio = this.image.height / this.image.width;
-  if (this.image.height > this.image.width &&
-      this.image.height > MAX_CANVAS_SIZE) {
-    this.canvasHeight(MAX_CANVAS_SIZE);
-    this.canvasWidth(this.canvasHeight() / ratio);
-  } else if (this.image.width >= this.image.height &&
-             this.image.width > MAX_CANVAS_SIZE) {
-    this.canvasWidth(MAX_CANVAS_SIZE);
-    this.canvasHeight(ratio * this.canvasWidth());
-  } else {
-    this.canvasHeight(this.image.height);
-    this.canvasWidth(this.image.width);
-  }
-  // Adjust for the canvas margin. The canvas margin
-  // allows the user to resize the image by drag & drop of corners
-  // and borders easier. That is because the margin gives more room to use
-  // the mouse for resizing.
-
-  // this.topLeftX = CANVAS_MARGIN;
-  // this.topLeftY = CANVAS_MARGIN;
-  // this.bottomRightX = this.canvasWidth();
-  // this.bottomRightY = this.canvasHeight();
-  // this.canvasWidth(this.canvasWidth() + CANVAS_MARGIN);
-  // this.canvasHeight(this.canvasHeight() + CANVAS_MARGIN);
-};
-
-/**
- * Draws the image to the canvas. Handles both images that are an instance of
- * Image or an instance of ImageData.
- */
-CanvasImage.prototype.drawImage = function() {
-  if (this.image instanceof Image) {
-    console.log('draw Image');
-    this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
-    // This drawing compensates for a given canvas margin
-    // this.context.drawImage(this.image, 0, 0, this.imageWidth, this.imageHeight, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
-  } else if (this.image instanceof ImageData) {
-    console.log('draw ImageData');
-    this.context.putImageData(this.image, 0, 0);
-  }
-};
-
-/**
- * Clears the canvas.
- */
-CanvasImage.prototype.clearCanvas = function() {
-  this.context.fillStyle = 'rgb(235, 240, 255)';
-  this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
-}
-
 /*******************
  * Custom Bindings *
  *******************/
@@ -120,6 +42,7 @@ ko.bindingHandlers.canvas = {
  */
 var ViewModel = function() {
   var self = this;
+
   this.numberVerticalSeams = ko.observable(0);
   this.numberHorizontalSeams = ko.observable(0);
 
@@ -127,12 +50,20 @@ var ViewModel = function() {
   this.seamcarver = {};
   this.energyPicture = {};
 
+  this.resizeCanvases = ko.observableArray([]);
   this.canvases = ko.observableArray([]);
   // imageData is the data saved in the file model.js
   imageData.forEach(function(data) {
-    var canvas = new CanvasImage(data);
-    canvas.imageLoaded = ko.observable(false);
-    self.canvases.push(canvas);
+    if (data.id === 'originalResize') {
+      // Resize-Canvas to get number pixels that need to be resized
+      var canvas = new ResizeImage(data, self.numberVerticalSeams, self.numberHorizontalSeams);
+      canvas.imageLoaded = ko.observable(false);
+      self.resizeCanvases.push(canvas);
+    } else {
+      var canvas = new CanvasImage(data);
+      canvas.imageLoaded = ko.observable(false);
+      self.canvases.push(canvas);
+    }
   });
 };
 
@@ -150,8 +81,16 @@ ViewModel.prototype.handleFile = function(file) {
   // The FileReader.onload function contains an event handler
   // executed when the load event is fired, which happens when
   // content read with readAsDataURL is available.
-  reader.onload = (function(canvases) {
+  reader.onload = (function(canvases, resizeCanvases) {
     return function(e) {
+      resizeCanvases.forEach(function(canvas) {
+        canvas.imageLoaded(false);
+        canvas.clearCanvas();
+        if (canvas.id === 'originalResize') {
+          canvas.image.src = e.target.result;
+          canvas.imageLoaded(true);
+        }
+      });
       canvases.forEach(function(canvas) {
         canvas.imageLoaded(false);
         canvas.clearCanvas();
@@ -165,7 +104,7 @@ ViewModel.prototype.handleFile = function(file) {
         }
       });
     };
-  })(self.canvases());
+  })(self.canvases(), self.resizeCanvases());
   // Start reading the data from file, when ready call the
   // reader.onload function.
   reader.readAsDataURL(file);

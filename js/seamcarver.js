@@ -56,6 +56,7 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams, numberHorizonta
 
   // Delete diagonally first
   var diagonal = Math.min(numberVerticalSeams, numberHorizontalSeams);
+  console.log(diagonal);
   var seam = 0;
   for (; seam < diagonal; seam++) {
     this.calculateHorizontalSeam(seam);
@@ -64,13 +65,13 @@ Seamcarver.prototype.resizeWidth = function(numberVerticalSeams, numberHorizonta
 
   // Delete the rest: delete vertical if there are more vertical seams to be
   // deleted
-  for (; seam < numberVerticalSeams - diagonal; seam++) {
+  for (; seam < numberVerticalSeams; seam++) {
     this.calculateVerticalSeam(seam);
   }
 
   // Delete the rest: delete horizontal if there are more horizontal seams to be
   // deleted
-  for (; seam < numberHorizontalSeams - diagonal; seam++) {
+  for (; seam < numberHorizontalSeams; seam++) {
     this.calculateHorizontalSeam(seam);
   }
 }
