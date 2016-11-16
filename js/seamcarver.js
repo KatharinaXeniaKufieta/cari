@@ -31,6 +31,9 @@ var Seamcarver = function(canvas) {
   this.resizedImage = new Imagegraph();
 }
 
+/**
+ * Prepare seamcarver before starting a resize.
+ */
 Seamcarver.prototype.prepareResize = function() {
   // prepare images before calculating seams
   this.originalImage.resetSeams();
@@ -39,13 +42,21 @@ Seamcarver.prototype.prepareResize = function() {
 }
 
 /**
- * Resizes the width of the uploaded image.
+ * Resizes the uploaded image.
  * @param {number} numberVerticalSeams - Number of vertical seams to be deleted,
  * as defined by the user.
  * @param {number} numberHorizontalSeams - Number of horizontal seams to be
  * deleted, as defined by the user.
+ * @param {object} maxProgress - Knockout observable holding maximum number for
+ * the progress bar showing how far the seamcarver has come.
+ * @param {object} progress - Knockout observable holding the current number of
+ * progress, how much the seamcarver has calculated.
+ * @param {object} timeLeft - Knockout observable holding an estimated value of
+ * how long the algorithm will still take to calculate the rest of the seams.
+ * @param {number} seam - Number of seams calculated so far.
+ * @returns {number} Seams calculated so far.
  */
-Seamcarver.prototype.resizeWidth = function(numberVerticalSeams, numberHorizontalSeams, maxProgress, progress, timeLeft, seam) {
+Seamcarver.prototype.resize = function(numberVerticalSeams, numberHorizontalSeams, maxProgress, progress, timeLeft, seam) {
   if (seam === 0) {
     // reset the seams in the original image before restarting a new calculation.
     if (numberVerticalSeams >= this.resizedImage.width) {

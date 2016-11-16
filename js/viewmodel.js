@@ -150,14 +150,17 @@ ViewModel.prototype.startResizing = function() {
   this.maxProgress(0);
   this.progress(0);
   this.seamcarver.prepareResize()
+  var start = Date.now();
+  console.log('time now: ' + start);
   var seams = 0;
   while (seams < this.numberVerticalSeams() + this.numberHorizontalSeams()) {
-    seams = this.seamcarver.resizeWidth(this.numberVerticalSeams(), this.numberHorizontalSeams(), this.maxProgress, this.progress, this.timeLeft, seams);
+    seams = this.seamcarver.resize(this.numberVerticalSeams(), this.numberHorizontalSeams(), this.maxProgress, this.progress, this.timeLeft, seams);
     // console.log(this.maxProgress());
     // console.log(this.progress());
     // console.log(this.timeLeft());
     this.timeLeft(20);
   }
+  console.log('time needed: ' + start);
 
   this.canvases().forEach(function(canvas) {
     if (canvas.id === 'resizedEnergy') {
