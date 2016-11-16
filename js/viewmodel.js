@@ -46,6 +46,11 @@ var ViewModel = function() {
   this.numberVerticalSeams = ko.observable(0);
   this.numberHorizontalSeams = ko.observable(0);
 
+  // Attempt to display a progress bar & remaining time to the user
+  this.progressVisible = ko.observable(false);
+  this.progress = ko.observable(0).extend({ deferred: true });
+  this.maxProgress = ko.observable(0).extend({deferred: true});
+  this.timeLeft = ko.observable(0).extend({ deferred: true });;
 
   // Variables that are going to be set by the custom binding
   this.seamcarver = {};
@@ -137,7 +142,22 @@ ViewModel.prototype.handleFile = function(file) {
 ViewModel.prototype.startResizing = function() {
   var self = this;
 
-  this.seamcarver.resizeWidth(this.numberVerticalSeams(), this.numberHorizontalSeams());
+  // Attempt to display a progress bar & remaining time to the user
+  // TODO: Finish this, maybe you need to put this.seamcarver.resizeWidth in a
+  // webworker? Not sure. Tried requestAnimationFrame and similar without
+  // success.
+  // this.progressVisible(true);
+  this.maxProgress(0);
+  this.progress(0);
+  this.seamcarver.prepareResize()
+  var seams = 0;
+  while (seams < this.numberVerticalSeams() + this.numberHorizontalSeams()) {
+    seams = this.seamcarver.resizeWidth(this.numberVerticalSeams(), this.numberHorizontalSeams(), this.maxProgress, this.progress, this.timeLeft, seams);
+    // console.log(this.maxProgress());
+    // console.log(this.progress());
+    // console.log(this.timeLeft());
+    this.timeLeft(20);
+  }
 
   this.canvases().forEach(function(canvas) {
     if (canvas.id === 'resizedEnergy') {
@@ -158,6 +178,10 @@ ViewModel.prototype.startResizing = function() {
       canvas.imageLoaded(true);
     }
   });
+  this.progressVisible(false);
+  this.maxProgress(0);
+  this.progress(0);
+  // this.timeLeft(0);
 }
 
 /******************

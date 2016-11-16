@@ -31,6 +31,13 @@ var Seamcarver = function(canvas) {
   this.resizedImage = new Imagegraph();
 }
 
+Seamcarver.prototype.prepareResize = function() {
+  // prepare images before calculating seams
+  this.originalImage.resetSeams();
+  this.resizedImage = new Imagegraph();
+  this.resizedImage.copy(this.originalImage);
+}
+
 /**
  * Resizes the width of the uploaded image.
  * @param {number} numberVerticalSeams - Number of vertical seams to be deleted,
@@ -38,41 +45,60 @@ var Seamcarver = function(canvas) {
  * @param {number} numberHorizontalSeams - Number of horizontal seams to be
  * deleted, as defined by the user.
  */
-Seamcarver.prototype.resizeWidth = function(numberVerticalSeams, numberHorizontalSeams) {
-  // prepare images before calculating seams
-  this.originalImage.resetSeams();
-  this.resizedImage = new Imagegraph();
-  this.resizedImage.copy(this.originalImage);
-  // reset the seams in the original image before restarting a new calculation.
+Seamcarver.prototype.resizeWidth = function(numberVerticalSeams, numberHorizontalSeams, maxProgress, progress, timeLeft, seam) {
+  if (seam === 0) {
+    // reset the seams in the original image before restarting a new calculation.
+    if (numberVerticalSeams >= this.resizedImage.width) {
+      console.log('can not delete more seams than the width of the image');
+      numberVerticalSeams = this.resizedImage.width - 1;
+    }
+    if (numberHorizontalSeams >= this.resizedImage.height) {
+      console.log('can not delete more seams than the height of the image');
+      numberHorizontalSeams = this.resizedImage.height - 1;
+    }
 
-  if (numberVerticalSeams >= this.resizedImage.width) {
-    console.log('can not delete more seams than the width of the image');
-    numberVerticalSeams = this.resizedImage.width - 1;
-  }
-  if (numberHorizontalSeams >= this.resizedImage.height) {
-    console.log('can not delete more seams than the height of the image');
-    numberHorizontalSeams = this.resizedImage.height - 1;
+    maxProgress(parseInt(numberVerticalSeams) + parseInt(numberHorizontalSeams));
+    var startTime = Date.now();
   }
 
   // Delete diagonally first
   var diagonal = Math.min(numberVerticalSeams, numberHorizontalSeams);
-  console.log(diagonal);
-  var seam = 0;
-  for (; seam < diagonal; seam++) {
+  // console.log(diagonal);
+  // var seam = 0;
+  var currentProgress = 0;
+  if (seam < diagonal) {
     this.calculateHorizontalSeam(seam);
+    currentProgress = progress() + 1;
+    progress(currentProgress);
     this.calculateVerticalSeam(seam);
+    currentProgress = progress() + 1;
+    progress(currentProgress);
+    timeLeft((Date.now() - startTime)/(seam * 2) * maxProgress());
+    seam++;
+    return seam;
   }
+  var totalSeamDiag = seam;
 
   // Delete the rest: delete vertical if there are more vertical seams to be
   // deleted
-  for (; seam < numberVerticalSeams; seam++) {
+  if (seam >= diagonal && seam < numberVerticalSeams) {
     this.calculateVerticalSeam(seam);
+    currentProgress = progress() + 1;
+    progress(currentProgress);
+    timeLeft((Date.now() - startTime)/(totalSeamDiag + seam) * maxProgress());
+    seam++;
+    return seam;
   }
 
   // Delete the rest: delete horizontal if there are more horizontal seams to be
   // deleted
-  for (; seam < numberHorizontalSeams; seam++) {
+  if (seam >= diagonal && seam < numberHorizontalSeams) {
     this.calculateHorizontalSeam(seam);
+    currentProgress = progress() + 1;
+    progress(currentProgress);
+    timeLeft((Date.now() - startTime)/(totalSeamDiag + seam) * maxProgress());
+    seam++;
+    return seam;
   }
 }
 
@@ -129,7 +155,7 @@ Seamcarver.prototype.getVerticalMinPath = function() {
       }
     }
   }
-  console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
+  // console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
   var counter = 0;
   while (minEndPixel != null) {
     counter++;
@@ -198,7 +224,7 @@ Seamcarver.prototype.getHorizontalMinPath = function() {
       }
     }
   }
-  console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
+  // console.log("MinEndPixel is found and has cost " + minEndPixel.cost);
   var counter = 0;
   while (minEndPixel != null) {
     counter++;
