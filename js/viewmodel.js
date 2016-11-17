@@ -45,6 +45,7 @@ var ViewModel = function() {
 
   this.numberVerticalSeams = ko.observable(0);
   this.numberHorizontalSeams = ko.observable(0);
+  this.fileName = ko.observable('');
 
   // Attempt to display a progress bar & remaining time to the user
   this.progressVisible = ko.observable(false);
@@ -100,6 +101,7 @@ var ViewModel = function() {
  */
 ViewModel.prototype.handleFile = function(file) {
   var self = this;
+  this.fileName(file.name);
   // The FileReader object lets web applications asynchronously
   // read the contents of files (or raw data buffers).
   var reader = new FileReader();
@@ -188,6 +190,7 @@ ViewModel.prototype.startResizing = function() {
   this.maxProgress(0);
   this.progress(0);
   // this.timeLeft(0);
+  this.calculatingText = ko.observable('Done!');
 }
 
 /******************
@@ -196,3 +199,7 @@ ViewModel.prototype.startResizing = function() {
 window.onload = function() {
   ko.applyBindings(new ViewModel());
 };
+
+$(document).ready(function(){
+  $('.collapsible').collapsible();
+});

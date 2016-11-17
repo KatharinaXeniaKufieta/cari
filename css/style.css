@@ -1,4 +1,16 @@
 figure {
-  background-color: rgb(235, 240, 255);
-  margin: 10px;
+  // background-color: rgb(235, 240, 255);
+  // margin: 10px;
+}
+
+form {
+  padding: 10px;
+}
+
+.size-input {
+  margin: 60px 0 0 0;
+}
+
+#start-resizing {
+  margin: 0 0 0 30px;
 }

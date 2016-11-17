@@ -4,59 +4,113 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Seam Carving</title>
-    <link rel="stylesheet" href="css/style.css">
     <!--Materialize framework-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link rel="stylesheet" href="css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
   </head>
   <body>
     <div class="container">
-      <div class="row">
-        <div class="col s12">
-          <h3>Seam Carving</h3>
-          <h4>Content aware image resizing</h4>
-        </div>
+      <div class="section">
+        <h4>Seam Carving - Content aware image resizing</h4>
       </div>
       <div class="row">
-        <div class="col s6 m6 l6">
-          <p>Upload a picture for seam carving</p>
-          <input data-bind="event: {change: function() {handleFile($element.files[0])}}" type="file">
-        </div>
-        <div class="col s3 m3 l3">
-          <p>Reduce the picture width (in pixels): </p>
-          <input data-bind="value: numberVerticalSeams" type="number">
-          <p>Reduce the picture height (in pixels): </p>
-          <input data-bind="value: numberHorizontalSeams" type="number">
-        </div>
-        <div class="col s3 m3 l3">
-          <button data-bind="click: startResizing" name="Start">Start resizing</button>
-        </div>
+        <ul class="collapsible" data-collapsible="accordion">
+          <li>
+            <div class="collapsible-header active"><i class="material-icons">file_upload</i>First step</div>
+            <div class="collapsible-body">
+              <div class="row">
+                <div class="col s4 m4 l4">
+                  <p>Upload a picture for seam carving</p>
+                </div>
+                <div class="col s8 m8 l8">
+                  <form action="#">
+                    <div class="file-field input-field">
+                      <div class="btn">
+                        <span>Upload File</span>
+                        <input data-bind="event: {change: function() {handleFile($element.files[0])}}" type="file">
+                      </div>
+                      <div class="file-path-wrapper">
+                        <input class="file-path validate" type="text">
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">photo_size_select_large</i>Second step</div>
+            <div class="collapsible-body">
+              <div class="row">
+                <div class="col s4 m4 l4">
+                  <p>Determine how much you want to resize the image. You can either enter values manually, or pick a size by resizing the image below. All values are in pixels.</p>
+                </div>
+                <div class="col s4 m4 l4">
+                  <div class="size-input input-field col s6">
+                    <input id="width_number" data-bind="value: numberVerticalSeams" type="number" class="validate" placeholder="0">
+                    <label for="width_number">Reduce width (number pixels)</label>
+                  </div>
+                </div>
+                <div class="col s4 m4 l4">
+                  <div class="size-input input-field col s6">
+                    <input id="height_number" data-bind="value: numberHorizontalSeams" type="number" class="validate" placeholder="0">
+                    <label for="height_number">Reduce height (number pixels)</label>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col s12 m12 l12">
+                <figure data-bind="foreach: resizeCanvases">
+                  <canvas data-bind="canvas: imageLoaded, attr: {width: canvasWidth, height: canvasHeight}, event: {mousemove: enablePulling, mousedown: getResize, mouseup: resizeImage}"></canvas>
+                  <figcaption data-bind="text: caption"></figcaption>
+                </figure>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="material-icons">update</i>Third step</div>
+            <div class="collapsible-body">
+              <div class="row">
+                <div class="col s6 m6 l6">
+                  <div class="col s12 m12 l12">
+                    <p>Start the Seamcarver and wait.</p>
+                  </div>
+                  <div class="col s12 m12 l12">
+                    <button id="start-resizing" class="waves-effect waves-light btn" data-bind="click: startResizing" name="Start">Start resizing</button>
+                  </div>
+                </div>
+                <div class="col s6 m6 l6">
+                  <p>The seam carver may take some time, between a few seconds up to a minute for very time intensive calculations.</p>
+                </div>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="divider"></div>
+      <div class="section">
+        <h4>Results</h4>
         <div data-bind="visible: progressVisible" class="col s3 m3 l3">
           <progress data-bind="attr:{value: progress, max: maxProgress}"></progress>
           <progress value="70" max="100"></progress>
           <p>Approximate time needed to carve image: <span data-bind="text: timeLeft"></p>
         </div>
-      </div>
-      <div class="row">
-        <div class="col s3 m3 l3">
-          <p>Reduce the picture width (in pixels): <span data-bind="text: numberVerticalSeams"></span></p>
-          <p>Reduce the picture height (in pixels): <span data-bind="text: numberHorizontalSeams"></span></p>
-        </div>
-        <div class="col s12 m12 l9">
-          <figure data-bind="foreach: resizeCanvases">
-            <canvas data-bind="canvas: imageLoaded, attr: {width: canvasWidth, height: canvasHeight}, event: {mousemove: enablePulling, mousedown: getResize, mouseup: resizeImage}"></canvas>
-            <figcaption data-bind="text: caption"></figcaption>
-          </figure>
-        <div class="col s12 m12 l9">
-          <figure data-bind="foreach: canvases">
-            <canvas data-bind="canvas: imageLoaded, attr: {width: canvasWidth, height: canvasHeight}"></canvas>
-            <figcaption data-bind="text: caption"></figcaption>
-          </figure>
+        <div class="row" data-bind="foreach: canvases">
+          <div class="col s12 m12 l12">
+            <figure>
+              <canvas data-bind="canvas: imageLoaded, attr: {width: canvasWidth, height: canvasHeight}"></canvas>
+              <figcaption data-bind="text: caption"></figcaption>
+            </figure>
+          </div>
         </div>
       </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-2.2.3.min.js" integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
     <script src="js/lib/knockout-3.4.1.js"></script>
+    <script src="js/lib/materialize.min.js"></script>
     <script src="js/helperfunctions.js"></script>
     <script src="js/pixel.js"></script>
     <script src="js/imagegraph.js"></script>

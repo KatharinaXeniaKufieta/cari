@@ -11,8 +11,8 @@ var CanvasImage = function(data) {
   var self = this;
   // Knockout observables of an Image
   this.caption = ko.observable(data.caption);
-  this.canvasWidth = ko.observable(30);
-  this.canvasHeight = ko.observable(30);
+  this.canvasWidth = ko.observable(MAX_CANVAS_SIZE);
+  this.canvasHeight = ko.observable(MAX_CANVAS_SIZE);
 
   // Regular variables of an Image
   this.id = data.id;
@@ -52,7 +52,7 @@ CanvasImage.prototype.scaleImage = function() {
  */
 CanvasImage.prototype.drawImage = function() {
   if (this.image instanceof Image) {
-    this.context.fillStyle = 'rgb(235, 240, 255)';
+    this.context.fillStyle = 'white';
     this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
     this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, 0, 0, this.canvasWidth(), this.canvasHeight());
   } else if (this.image instanceof ImageData) {
@@ -65,7 +65,7 @@ CanvasImage.prototype.drawImage = function() {
  * Clears the canvas.
  */
 CanvasImage.prototype.clearCanvas = function() {
-  this.context.fillStyle = 'rgb(235, 240, 255)';
+  this.context.fillStyle = 'white';
   this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
 };
 
@@ -144,7 +144,7 @@ ResizeImage.prototype.scaleImage = function() {
  */
 ResizeImage.prototype.drawImage = function() {
   if (this.image instanceof Image) {
-    this.context.fillStyle = 'rgb(235, 240, 255)';
+    this.context.fillStyle = 'white';
     this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
     this.context.drawImage(this.image, 0, 0, this.image.width, this.image.height, this.topLeftX, this.topLeftY, this.canvasWidth() - 2 * CANVAS_MARGIN, this.canvasHeight() - 2 * CANVAS_MARGIN);
   } else if (this.image instanceof ImageData) {
@@ -157,7 +157,7 @@ ResizeImage.prototype.drawImage = function() {
  * Clears the canvas.
  */
 ResizeImage.prototype.clearCanvas = function() {
-  this.context.fillStyle = 'rgb(235, 240, 255)';
+  this.context.fillStyle = 'white';
   this.context.fillRect(0, 0, this.canvasWidth(), this.canvasHeight());
 }
 
