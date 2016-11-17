@@ -36,10 +36,8 @@ Given that all inputs were correct, the program then calculates the first seam a
 
 The list of To-Dos is as follows:
 
-1. Re-factor the program into MVVM using Knockout.js before adding features.
-2. Add feature: Picture is automatically compressed by program prior to seam calculation (might be necessary in order to get feasible waiting/processing times).
-3. Add feature: Width and height reduction possible (so far only width reduction is implemented)
-4. Add dragging as a way to resize picture.
-5. Precalculate 3 versions on how to resize picture: Width, height and diagonally (which could be width & height alternating). Allow the user to decide the direction by dragging the original picture.
-6. Add a % bar to show progress of (pre-) calculations, calculate estimated time until finished and show to the user.
-7. Give option to download resized picture, or even download all pictures (e.g. including seams and energy picture) in a zip file.
+1. Maybe: Precalculate 3 versions on how to resize picture: Width, height and diagonally (which could be width & height alternating). Allow the user to decide the direction by dragging the original picture. Possibly precalculate 25%, 50% and 75% sizes of the image for faster real-time resizing.
+2. Add a % bar to show progress of (pre-) calculations, calculate estimated time until finished and show to the user.
+3. Give option to download resized picture, or even download all pictures (e.g. including seams and energy picture) in a zip file.
+4. Add links & information about seamcarver, link to the paper, and to images that are an example.
+5. Add a link to my linkedin & github pages.
