@@ -160,7 +160,10 @@ ViewModel.prototype.startResizing = function() {
     // console.log(this.timeLeft());
     this.timeLeft(20);
   }
-  console.log('time needed: ' + start);
+  var timeelapsed = Date.now() - start;
+  console.log('time needed: ' + timeelapsed);
+  var avgTime = timeelapsed/(this.numberVerticalSeams() + this.numberHorizontalSeams());
+  console.log('time needed/ #seams: ' + avgTime);
 
   this.canvases().forEach(function(canvas) {
     if (canvas.id === 'resizedEnergy') {
