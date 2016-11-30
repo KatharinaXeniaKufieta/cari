@@ -10,13 +10,11 @@ This is an experimental implementation of the algorithm in the browser. It is a 
 Test the application in the [Demo](http://katharinaxeniakufieta.github.io/cari/).
 
 ## Dependencies
-Knockout.js
-
 ### CSS Framework
-The CSS Framework used in this project is [MaterialzeCSS](http://materializecss.com/). (EDIT: not yet)
+The CSS Framework used in this project is [MaterialzeCSS](http://materializecss.com/).
 
 ### JavaScript
-The design of the program is based on MVVM and uses Knockout as a framework.
+The design of the program is based on MVVM and uses [Knockout.js](http://knockoutjs.com/) as a framework.
 
 ## Author
 The code is written by [Katharina Kufieta](https://www.linkedin.com/in/katharinakufieta).
@@ -36,8 +34,9 @@ Given that all inputs were correct, the program then calculates the first seam a
 
 The list of To-Dos is as follows:
 
-1. Maybe: Precalculate 3 versions on how to resize picture: Width, height and diagonally (which could be width & height alternating). Allow the user to decide the direction by dragging the original picture. Possibly precalculate 25%, 50% and 75% sizes of the image for faster real-time resizing.
-2. Add a % bar to show progress of (pre-) calculations, calculate estimated time until finished and show to the user.
+1. Put the seam carving calculations into a webworker so the app will not freeze during calculations.
+2. Add a % bar to show progress of (pre-) calculations, calculate estimated time until finished and show to the user. (webworker has to be implemented first)
 3. Give option to download resized picture, or even download all pictures (e.g. including seams and energy picture) in a zip file.
 4. Add links & information about seamcarver, link to the paper, and to images that are an example.
 5. Add a link to my linkedin & github pages.
+6. Maybe: Precalculate 3 versions on how to resize picture: Width, height and diagonally (which could be width & height alternating). Allow the user to decide the direction by dragging the original picture. Possibly precalculate 25%, 50% and 75% sizes of the image for faster real-time resizing.
