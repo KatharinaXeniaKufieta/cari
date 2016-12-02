@@ -25,7 +25,7 @@ The design of the program is based on MVVM and uses [Knockout.js](http://knockou
 1. I started developing this program before I knew how to use design patterns, what MVVM is and how to use Knockout.js. Once I learned all that, I needed to refactor the code and incorporate Knockout.js, before I continued adding more features. In order to understand how to combine Knockout and HTML5 Canvas, I developed this small example on [JSFiddle](https://jsfiddle.net/katharinaxeniakufieta/ateos0x2/).
 2. I needed an implementation to resize the image inside the canvas by dragging and dropping the borders and corners of the image. This will give the user an intuitive interface to resize their pictures. I implemented this function on [JSFiddle](https://jsfiddle.net/katharinaxeniakufieta/sbf3tsnz/).
 
-## TO DO
+## TO DO / Collaboration sought to do
 The list of To-Dos is as follows:
 
 1. Put the seam carving calculations into a webworker so the app will not freeze during calculations.
