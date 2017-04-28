@@ -100,6 +100,7 @@ var ViewModel = function() {
  * @param {object} file - File uploaded by the user.
  */
 ViewModel.prototype.handleFile = function(file) {
+  console.log(file)
   var self = this;
   this.fileName(file.name);
   // The FileReader object lets web applications asynchronously
