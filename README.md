@@ -1,4 +1,4 @@
-#Content Aware Resizing of Images (CARI)
+# Content Aware Resizing of Images (CARI)
 
 CARI is a seam carving algorithm based on [this paper](http://graphics.cs.cmu.edu/courses/15-463/2007_fall/hw/proj2/imret.pdf), implemented in the browser.
 
